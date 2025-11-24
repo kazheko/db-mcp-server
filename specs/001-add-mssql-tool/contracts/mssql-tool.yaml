@@ -1,0 +1,115 @@
+openapi: 3.0.3
+info:
+  title: MSSQL Query Tool Contract
+  version: 1.0.0
+  description: >-
+    MCP-facing HTTP-style representation of the `mssql-query` tool invocation used for
+    schema validation. The actual transport is managed by the MCP SDK but this contract
+    captures the request/response payloads for downstream agents.
+servers:
+  - url: mcp://local-server
+paths:
+  /tools/mssql-query:
+    post:
+      summary: Invoke the MSSQL query tool via MCP
+      description: Executes a read-only single-statement SQL query preview through the MSSQL adapter stub.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - database
+                - query
+              properties:
+                database:
+                  type: string
+                  description: Logical database/catalog identifier supplied by the client.
+                query:
+                  type: string
+                  description: Read-only SQL text containing exactly one statement.
+                maxRows:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  description: Optional synthetic row cap forwarded to the adapter stub.
+      responses:
+        '200':
+          description: Successful synthetic recordset response.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - correlationId
+                  - database
+                  - recordset
+                  - startedAt
+                  - completedAt
+                properties:
+                  correlationId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier for tracing a single invocation.
+                  database:
+                    type: string
+                    description: Echo of the requested database name.
+                  recordset:
+                    type: array
+                    description: Synthetic structural preview of the MSSQL response.
+                    items:
+                      type: object
+                      required:
+                        - columns
+                        - rows
+                      properties:
+                        columns:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - name
+                              - type
+                            properties:
+                              name:
+                                type: string
+                              type:
+                                type: string
+                              nullable:
+                                type: boolean
+                                default: false
+                        rows:
+                          type: array
+                          description: Array of synthetic values constrained by `maxRows`.
+                          items:
+                            type: array
+                            items:
+                              type: string
+                  startedAt:
+                    type: string
+                    format: date-time
+                  completedAt:
+                    type: string
+                    format: date-time
+        '4XX':
+          description: Propagated adapter/tool error.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    type: object
+                    description: Original error object thrown by the adapter or handler.
+        '5XX':
+          description: Transport-level MCP server failure.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
