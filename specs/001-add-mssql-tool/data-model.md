@@ -20,19 +20,19 @@
   - `title`: "MSSQL Query Tool"
   - `description`: explains read-only query previews through the adapter stub
   - `inputSchema`: JSON schema with `database` (string, required), `query` (string, required), `maxRows` (number, optional)
-  - `outputSchema`: JSON schema with `correlationId`, `database`, `recordset`, `startedAt`, `completedAt`
+  - `outputSchema`: JSON schema with `correlationId`, `database`, `queryResult`, `startedAt`, `completedAt`
 - **Relationships**:
   - Registered within the MCP Server Instance `tools` array.
   - Executed by the MSSQL Adapter Stub.
 - **Rules**:
   - Input schema only documents fields; it does not apply runtime validation in this feature.
-  - Output schema guarantees presence of metadata fields even if the recordset is empty.
+  - Output schema guarantees presence of metadata fields even if the `queryResult` array is empty.
 
 ## Entity: MSSQL Adapter Stub
 - **Purpose**: Placeholder that fabricates deterministic structural data.
 - **Key Fields**:
   - `execute(params)`: method accepting `{ database, query, maxRows? }`
-  - `recordTemplates`: internal configuration containing column metadata + sample synthetic values per template
+  - `rowTemplates`: internal configuration describing canonical column names and default values for synthetic rows
 - **Relationships**:
   - Called exclusively by the MSSQL Query Tool handler.
   - Returns data for the Tool Response Envelope; may throw errors for negative path tests.
@@ -46,7 +46,7 @@
 - **Key Fields**:
   - `correlationId`: UUID string generated per invocation
   - `database`: echoes the requested database name
-  - `recordset`: array of objects with `columns` metadata and synthetic `rows`
+  - `queryResult`: array of JSON objects whose keys mirror MSSQL column names
   - `startedAt`: ISO 8601 timestamp set immediately before adapter call
   - `completedAt`: ISO 8601 timestamp set immediately after adapter response/error handling
 - **Relationships**:

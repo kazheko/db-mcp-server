@@ -21,20 +21,7 @@ const inputSchema = z.object({
 const outputSchema = z.object({
   correlationId: z.string().describe('Per-invocation identifier useful for tracing logs.'),
   database: z.string().describe('Echo of the requested database name.'),
-  recordset: z
-    .array(
-      z.object({
-        columns: z.array(
-          z.object({
-            name: z.string(),
-            type: z.string(),
-            nullable: z.boolean().optional()
-          })
-        ),
-        rows: z.array(z.array(z.string()))
-      })
-    )
-    .describe('Synthetic structural preview of the MSSQL rows returned by the stub.'),
+  queryResult: z.array(z.record(z.any())).describe('Synthetic JSON rows mirroring the shape of a SELECT result.'),
   startedAt: z.string().describe('ISO-8601 timestamp recorded immediately before the adapter is invoked.'),
   completedAt: z.string().describe('ISO-8601 timestamp recorded immediately after the adapter resolves.')
 });
@@ -54,7 +41,7 @@ export function createMssqlTool(adapter: MssqlAdapter) {
     const correlationId = uuidv4();
     const startedAt = new Date().toISOString();
 
-    const recordset = await withErrorPassthrough(
+    const queryResult = await withErrorPassthrough(
       () => adapter.execute(params),
       { correlationId, context: { database: params.database } }
     );
@@ -64,7 +51,7 @@ export function createMssqlTool(adapter: MssqlAdapter) {
     return {
       correlationId,
       database: params.database,
-      recordset,
+      queryResult,
       startedAt,
       completedAt
     };
@@ -75,12 +62,16 @@ export function createMssqlTool(adapter: MssqlAdapter) {
 
 export function registerMssqlTool(server: McpServer, adapter: MssqlAdapter) {
   const tool = createMssqlTool(adapter);
-  server.registerTool(tool.name, {
-    title: tool.title,
-    description: tool.description,
-    inputSchema: tool.inputSchema,
-    outputSchema: tool.outputSchema
-  }, tool.handler);
+  server.registerTool(
+    tool.name,
+    {
+      title: tool.title,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+      outputSchema: tool.outputSchema
+    },
+    tool.handler
+  );
 
   return tool;
 }

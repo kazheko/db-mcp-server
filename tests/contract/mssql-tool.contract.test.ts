@@ -10,7 +10,7 @@ const invokeTool = async (input: Parameters<ReturnType<typeof createMssqlTool>['
 };
 
 describe('mssql-query tool contract', () => {
-  it('returns deterministic metadata and recordset payload', async () => {
+  it('returns deterministic metadata and JSON payload', async () => {
     const response = await invokeTool({
       database: 'hr',
       query: 'SELECT * FROM employees',
@@ -20,15 +20,11 @@ describe('mssql-query tool contract', () => {
     expect(response.database).toBe('hr');
     expect(response.correlationId).toMatch(/^[0-9a-f-]{36}$/i);
     expect(new Date(response.startedAt).getTime()).toBeLessThanOrEqual(new Date(response.completedAt).getTime());
-    expect(response.recordset.length).toBeGreaterThan(0);
-
-    for (const set of response.recordset) {
-      expect(set.columns.length).toBeGreaterThan(0);
-      expect(set.rows.length).toBeLessThanOrEqual(5);
-      for (const row of set.rows) {
-        expect(row.length).toBe(set.columns.length);
-      }
-    }
+    expect(response.queryResult.length).toBe(5);
+    response.queryResult.forEach((row) => {
+      expect(row).toHaveProperty('EmployeeId');
+      expect(row).toHaveProperty('FullName');
+    });
   });
 
   it('exposes manifest metadata for discovery', () => {
@@ -46,9 +42,7 @@ describe('mssql-query tool contract', () => {
     const outputResult = tool.outputSchema.safeParse({
       correlationId: '00000000-0000-4000-8000-000000000000',
       database: 'analytics',
-      recordset: [
-        { columns: [], rows: [] }
-      ],
+      queryResult: [],
       startedAt: new Date().toISOString(),
       completedAt: new Date().toISOString()
     });

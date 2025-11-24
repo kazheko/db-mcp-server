@@ -36,7 +36,7 @@ paths:
                   description: Optional synthetic row cap forwarded to the adapter stub.
       responses:
         '200':
-          description: Successful synthetic recordset response.
+          description: Successful synthetic query result response.
           content:
             application/json:
               schema:
@@ -44,7 +44,7 @@ paths:
                 required:
                   - correlationId
                   - database
-                  - recordset
+                  - queryResult
                   - startedAt
                   - completedAt
                 properties:
@@ -55,37 +55,12 @@ paths:
                   database:
                     type: string
                     description: Echo of the requested database name.
-                  recordset:
+                  queryResult:
                     type: array
-                    description: Synthetic structural preview of the MSSQL response.
+                    description: Synthetic JSON rows mirroring MSSQL SELECT output.
                     items:
                       type: object
-                      required:
-                        - columns
-                        - rows
-                      properties:
-                        columns:
-                          type: array
-                          items:
-                            type: object
-                            required:
-                              - name
-                              - type
-                            properties:
-                              name:
-                                type: string
-                              type:
-                                type: string
-                              nullable:
-                                type: boolean
-                                default: false
-                        rows:
-                          type: array
-                          description: Array of synthetic values constrained by `maxRows`.
-                          items:
-                            type: array
-                            items:
-                              type: string
+                      additionalProperties: true
                   startedAt:
                     type: string
                     format: date-time

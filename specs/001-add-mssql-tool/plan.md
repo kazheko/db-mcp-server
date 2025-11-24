@@ -4,7 +4,7 @@
 **Input**: Feature specification from `/specs/001-add-mssql-tool/spec.md`
 
 ## Summary
-Implement the first MCP server instance with the official TypeScript SDK, register a single `mssql-query` tool, and route executions through a detachable MSSQL adapter stub. The stub fabricates deterministic structural recordsets, while the handler surrounds it with correlation/timestamp metadata and a transparent error passthrough. Documentation plus contract artifacts define the tool surface for downstream clients.
+Implement the first MCP server instance with the official TypeScript SDK, register a single `mssql-query` tool, and route executions through a detachable MSSQL adapter stub. The stub fabricates deterministic structural queryResults, while the handler surrounds it with correlation/timestamp metadata and a transparent error passthrough. Documentation plus contract artifacts define the tool surface for downstream clients.
 
 ## Technical Context
 
@@ -50,7 +50,7 @@ src/
 |-- tools/
 |   `-- mssql-query.ts      # Tool definition + handler + error wrapper
 |-- adapters/
-|   `-- mssql.ts            # Stub implementation returning synthetic recordsets
+|   `-- mssql.ts            # Stub implementation returning synthetic queryResults
 |-- errors/
 |   `-- handler.ts          # Shared error passthrough helpers
 `-- types/

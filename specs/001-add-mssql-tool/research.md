@@ -8,7 +8,7 @@
   Rationale: Encapsulating the adapter keeps future multi-engine expansion simple and makes it obvious that the current implementation is a placeholder.
   Alternatives considered: Inlining stub logic directly inside the tool handler (rejected because it prevents swapping adapters) and mocking a driver connection (rejected because it risks accidental data access).
 
-- Decision: Interpret the required `recordset` output as a structural preview (column names, sample synthetic values) so the response demonstrates schema shape without leaking production data.
+- Decision: Interpret the required `queryResult` output as a structural preview (column names, sample synthetic values) so the response demonstrates schema shape without leaking production data.
   Rationale: This interpretation satisfies the spec while remaining compliant with the constitution's "Structure & Statistics" rule.
   Alternatives considered: Returning empty arrays (rejected because it would not validate downstream flows) and echoing user-provided SQL verbatim (rejected because it provides no schema context).
 

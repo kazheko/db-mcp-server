@@ -4,29 +4,18 @@ export type MssqlQueryRequest = {
   maxRows?: number;
 };
 
-export type MssqlRecordColumn = {
-  name: string;
-  type: string;
-  nullable?: boolean;
-};
-
-export type MssqlRecordRow = string[];
-
-export type MssqlRecordset = {
-  columns: MssqlRecordColumn[];
-  rows: MssqlRecordRow[];
-};
+export type QueryResultRow = Record<string, unknown>;
 
 export type MssqlQueryResponse = {
   correlationId: string;
   database: string;
-  recordset: MssqlRecordset[];
+  queryResult: QueryResultRow[];
   startedAt: string;
   completedAt: string;
 };
 
 export interface MssqlAdapter {
-  execute(request: MssqlQueryRequest): Promise<MssqlRecordset[]>;
+  execute(request: MssqlQueryRequest): Promise<QueryResultRow[]>;
 }
 
 export type ToolMetadata<TInput, TOutput> = {

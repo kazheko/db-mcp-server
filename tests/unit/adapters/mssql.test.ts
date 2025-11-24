@@ -16,7 +16,8 @@ describe('StubMssqlAdapter', () => {
     const second = await adapter.execute(request);
 
     expect(first).toStrictEqual(second);
-    expect(first[0]?.rows.length).toBe(2);
+    expect(first).toHaveLength(2);
+    expect(first[0]).toHaveProperty('EmployeeId');
   });
 
   it('falls back to default row count when maxRows missing', async () => {
@@ -25,6 +26,7 @@ describe('StubMssqlAdapter', () => {
       query: 'SELECT id FROM opportunities'
     });
 
-    expect(response[0]?.rows.length).toBe(3);
+    expect(response).toHaveLength(3);
+    expect(response[0]).toHaveProperty('ColumnName');
   });
 });

@@ -27,7 +27,7 @@
    ```bash
    npm run mcp:invoke -- --database hr --query "SELECT * FROM employees" --maxRows 5
    ```
-2. Verify the response payload includes `correlationId`, `database`, `recordset`, `startedAt`, and `completedAt` with synthetic data.
+2. Verify the response payload includes `correlationId`, `database`, `queryResult`, `startedAt`, and `completedAt` with synthetic data.
 3. Trigger the negative path:
    ```bash
    npm run mcp:invoke -- --database hr --query "RAISEERROR"
@@ -39,7 +39,7 @@
    ```bash
    npm run mcp:invoke -- --describe
    ```
-2. Confirm the JSON includes the tool `name`, `title`, `description`, and the documented input/output fields (`database`, `query`, `maxRows`, `correlationId`, `database`, `recordset`, `startedAt`, `completedAt`).
+2. Confirm the JSON includes the tool `name`, `title`, `description`, and the documented input/output fields (`database`, `query`, `maxRows` inputs + `correlationId`, `database`, `queryResult`, `startedAt`, `completedAt` outputs).
 3. MCP clients will see the same manifest content during the handshake phase, so any deviation here should block release.
 
 ## Testing
@@ -51,3 +51,4 @@
    ```bash
    npm run test:watch -- adapters
    ```
+

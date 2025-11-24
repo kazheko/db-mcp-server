@@ -1,7 +1,7 @@
 import type {
   MssqlAdapter,
   MssqlQueryRequest,
-  MssqlRecordset
+  QueryResultRow
 } from '../types/mssql.js';
 
 const DEFAULT_ROW_COUNT = 3;
@@ -60,18 +60,13 @@ function pickTemplate(query: string): StubTemplate {
 }
 
 export class StubMssqlAdapter implements MssqlAdapter {
-  async execute(request: MssqlQueryRequest): Promise<MssqlRecordset[]> {
+  async execute(request: MssqlQueryRequest): Promise<QueryResultRow[]> {
     this.throwIfErrorScenario(request.query);
     const template = pickTemplate(request.query);
     const requestedRows = this.getRequestedRowCount(request.maxRows);
     const rows = this.buildRows(template.rows, requestedRows);
 
-    return [
-      {
-        columns: template.columns,
-        rows
-      }
-    ];
+    return rows.map((row) => this.rowToObject(template.columns, row));
   }
 
   private buildRows(baseRows: string[][], maxRows: number): string[][] {
@@ -81,6 +76,16 @@ export class StubMssqlAdapter implements MssqlAdapter {
       result.push([...sourceRow]);
     }
     return result;
+  }
+
+  private rowToObject(
+    columns: StubTemplate['columns'],
+    row: string[]
+  ): QueryResultRow {
+    return columns.reduce<QueryResultRow>((acc, column, index) => {
+      acc[column.name] = row[index] ?? null;
+      return acc;
+    }, {});
   }
 
   private getRequestedRowCount(maxRows?: number): number {

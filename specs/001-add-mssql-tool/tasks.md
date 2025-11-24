@@ -24,7 +24,7 @@
 
 **Purpose**: Core infrastructure needed before user-story-specific behavior.
 
-- [X] T004 Define shared MSSQL adapter request/response interfaces and recordset shapes in `src/types/mssql.ts`.
+- [X] T004 Define shared MSSQL adapter request/response interfaces and queryResult shapes in `src/types/mssql.ts`.
 - [X] T005 [P] Implement the reusable error handler scaffold in `src/errors/handler.ts` with placeholders for passthrough behavior.
 - [X] T006 [P] Configure Vitest (ESM + ts-node/tsx) and create base folder structure in `vitest.config.ts`, `tests/contract/`, and `tests/unit/`.
 - [X] T007 Initialize the MCP server bootstrap with the official SDK (connection wiring only) in `src/server/index.ts`.
@@ -35,9 +35,9 @@
 
 ## Phase 3: User Story 1 - Execute MSSQL query via stub adapter (Priority: P1) — MVP
 
-**Goal**: Allow LLM clients to call the `mssql-query` tool and receive deterministic structural recordsets with correlation/timestamp metadata.
+**Goal**: Allow LLM clients to call the `mssql-query` tool and receive deterministic structural queryResults with correlation/timestamp metadata.
 
-**Independent Test**: Use an MCP client to invoke `mssql-query` with varying `maxRows` values; verify the response includes `correlationId`, `database`, bounded `recordset`, `startedAt`, and `completedAt`.
+**Independent Test**: Use an MCP client to invoke `mssql-query` with varying `maxRows` values; verify the response includes `correlationId`, `database`, bounded `queryResult`, `startedAt`, and `completedAt`.
 
 ### Tests
 
