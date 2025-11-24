@@ -1,0 +1,23 @@
+# Node/TypeScript build artifacts
+node_modules/
+dist/
+build/
+coverage/
+
+# Logs and diagnostics
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+
+# Editor and OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
