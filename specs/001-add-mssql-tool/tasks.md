@@ -15,7 +15,7 @@
 **Purpose**: Establish the Node.js/TypeScript workspace and directory skeleton described in plan.md.
 
 - [X] T001 Update Node/TypeScript targets and dependency stubs in `package.json` and `tsconfig.json` for Node 20 + TypeScript 5 baseline.
-- [X] T002 [P] Scaffold required source folders/files (`src/server/index.ts`, `src/tools/mssql-tool.ts`, `src/tools/tool-factory.ts`, `src/adapters/mssql.ts`, `src/errors/handler.ts`, `src/types/mssql.ts`) per plan structure.
+- [X] T002 [P] Scaffold required source folders/files (`src/server/index.ts`, `src/tools/mssql-tool.ts`, `src/tools/tool-factory.ts`, `src/tools/log-wrapper.ts`, `src/adapters/mssql.ts`, `src/types/mssql.ts`) per plan structure.
 - [X] T003 [P] Add npm scripts for `dev:mcp`, `mcp:invoke`, and `test` workflows referenced in quickstart within `package.json`.
 
 ---
@@ -25,7 +25,7 @@
 **Purpose**: Core infrastructure needed before user-story-specific behavior.
 
 - [X] T004 Define shared MSSQL adapter request/response interfaces and queryResult shapes in `src/types/mssql.ts`.
-- [X] T005 [P] Implement the reusable error handler scaffold in `src/errors/handler.ts` with placeholders for passthrough behavior.
+- [X] T005 [P] Implement the reusable logging/error decorator in `src/tools/log-wrapper.ts` with placeholders for future enhancements.
 - [X] T006 [P] Configure Vitest (ESM + ts-node/tsx) and create base folder structure in `vitest.config.ts`, `tests/contract/`, and `tests/unit/`.
 - [X] T007 Initialize the MCP server bootstrap with the official SDK (connection wiring only) in `src/server/index.ts`.
 
@@ -68,7 +68,7 @@
 ### Implementation
 
 - [X] T015 [US2] Finalize the error handler to serialize and forward raw adapter errors in `src/errors/handler.ts`.
-- [X] T016 [US2] Integrate the error handler into the tool execution pipeline so failures bypass success envelopes in `src/tools/mssql-tool.ts`.
+- [X] T016 [US2] Ensure the logging decorator wraps tool execution so failures emit structured error content in `src/tools/log-wrapper.ts`.
 
 **Checkpoint**: User Stories 1+2 independently verifiable.
 
@@ -128,5 +128,6 @@
 2. Layer in transparent error propagation (Phase 4) to unblock troubleshooting workflows.
 3. Finalize metadata discovery (Phase 5) so clients can self-describe the tool.
 4. Run Polish tasks (Phase 6) to validate the quickstart and capture lessons for future adapters.
+
 
 

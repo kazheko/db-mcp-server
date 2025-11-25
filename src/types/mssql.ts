@@ -6,6 +6,10 @@ export type MssqlQueryRequest = {
 
 export type QueryResultRow = Record<string, unknown>;
 
+export interface QueryAdapter<TRequest, TResult> {
+  execute(request: TRequest): Promise<TResult>;
+}
+
 export type MssqlQueryResponse = {
   correlationId: string;
   database: string;
@@ -13,7 +17,3 @@ export type MssqlQueryResponse = {
   startedAt: string;
   completedAt: string;
 };
-
-export interface MssqlAdapter {
-  execute(request: MssqlQueryRequest): Promise<QueryResultRow[]>;
-}

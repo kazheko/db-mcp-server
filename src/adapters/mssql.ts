@@ -1,5 +1,5 @@
 import type {
-  MssqlAdapter,
+  QueryAdapter,
   MssqlQueryRequest,
   QueryResultRow
 } from '../types/mssql.js';
@@ -59,7 +59,7 @@ function pickTemplate(query: string): StubTemplate {
   return matched?.[1] ?? templates.default;
 }
 
-export class StubMssqlAdapter implements MssqlAdapter {
+export class StubMssqlAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
   async execute(request: MssqlQueryRequest): Promise<QueryResultRow[]> {
     this.throwIfErrorScenario(request.query);
     const template = pickTemplate(request.query);

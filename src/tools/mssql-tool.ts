@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
-import { withErrorPassthrough } from '../errors/handler.js';
 import type {
-  MssqlAdapter,
+  QueryAdapter,
   MssqlQueryRequest,
-  MssqlQueryResponse
+  MssqlQueryResponse,
+  QueryResultRow
 } from '../types/mssql.js';
 import type { ToolDefinition } from './types.js';
 
@@ -44,16 +44,13 @@ export class MssqlTool
   readonly inputSchema = inputSchema;
   readonly outputSchema = outputSchema;
 
-  constructor(private readonly adapter: MssqlAdapter) {}
+  constructor(private readonly adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>) {}
 
   handler = async (params: MssqlQueryRequest) => {
     const correlationId = uuidv4();
     const startedAt = new Date().toISOString();
 
-    const queryResult = await withErrorPassthrough(
-      () => this.adapter.execute(params),
-      { correlationId, context: { database: params.database } }
-    );
+    const queryResult = await this.adapter.execute(params);
 
     const completedAt = new Date().toISOString();
     const payload: MssqlQueryResponse = {
