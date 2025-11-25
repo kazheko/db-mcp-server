@@ -1,34 +1,31 @@
 import { describe, expect, it } from 'vitest';
 
 import { StubMssqlAdapter } from '../../src/adapters/mssql.js';
-import { createMssqlTool } from '../../src/tools/mssql-query.js';
+import { ToolFactory } from '../../src/tools/tool-factory.js';
 
-type ToolResult = Awaited<ReturnType<ReturnType<typeof createMssqlTool>['handler']>>;
+const factory = new ToolFactory();
 
-const invokeTool = async (input: Parameters<ReturnType<typeof createMssqlTool>['handler']>[0]) => {
+const invokeTool = async (
+  input: Parameters<ReturnType<ToolFactory['createMssqlTool']>['handler']>[0]
+) => {
   const adapter = new StubMssqlAdapter();
-  const tool = createMssqlTool(adapter);
+  const tool = factory.createMssqlTool(adapter);
   return tool.handler(input);
 };
 
-const extractPayload = (result: ToolResult) => {
-  if (result.structuredContent) {
-    return result.structuredContent;
-  }
-  const text = result.content?.[0]?.text ?? '{}';
-  return JSON.parse(text);
-};
+type ToolResult = Awaited<ReturnType<typeof invokeTool>>;
 
 describe('mssql-query tool contract', () => {
   it('returns deterministic metadata and JSON payload', async () => {
-    const result = await invokeTool({
+    const result: ToolResult = await invokeTool({
       database: 'hr',
       query: 'SELECT * FROM employees',
       maxRows: 5
     });
 
     expect(result.content?.[0]?.type).toBe('text');
-    const response = extractPayload(result);
+    const text = result.content?.[0]?.text ?? '{}';
+    const response = JSON.parse(text);
 
     expect(response.database).toBe('hr');
     expect(response.correlationId).toMatch(/^[0-9a-f-]{36}$/i);
@@ -41,7 +38,7 @@ describe('mssql-query tool contract', () => {
   });
 
   it('exposes manifest metadata for discovery', () => {
-    const tool = createMssqlTool(new StubMssqlAdapter());
+    const tool = factory.createMssqlTool(new StubMssqlAdapter());
     expect(tool.title).toBe('MSSQL Query Tool');
     expect(tool.description).toMatch(/read-only/i);
 

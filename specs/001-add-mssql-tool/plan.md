@@ -48,7 +48,7 @@ src/
 |-- server/
 |   `-- index.ts            # MCP server bootstrap + tool registration
 |-- tools/
-|   `-- mssql-query.ts      # Tool definition + handler + error wrapper
+|   |-- mssql-tool.ts      # Tool metadata + handler composition\n|   `-- tool-factory.ts    # Factory for building and registering tools
 |-- adapters/
 |   `-- mssql.ts            # Stub implementation returning synthetic queryResults
 |-- errors/
@@ -71,3 +71,4 @@ tests/
 ## Complexity Tracking
 
 No constitution deviations or additional complexity exceptions identified for this feature.
+

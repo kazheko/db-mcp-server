@@ -1,4 +1,3 @@
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -6,11 +5,9 @@ import { withErrorPassthrough } from '../errors/handler.js';
 import type {
   MssqlAdapter,
   MssqlQueryRequest,
-  MssqlQueryResponse,
-  ToolMetadata
+  MssqlQueryResponse
 } from '../types/mssql.js';
-
-export const MSSQL_TOOL_NAME = 'mssql-query';
+import type { ToolDefinition } from './types.js';
 
 const inputSchema = z.object({
   database: z.string().describe('Logical database/catalog name to target.'),
@@ -37,28 +34,28 @@ const outputSchema = z.object({
     .describe('ISO-8601 timestamp recorded immediately after the adapter resolves.')
 });
 
-export type MssqlTool = ReturnType<typeof createMssqlTool>;
+export class MssqlTool
+  implements ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest>
+{
+  readonly name = 'mssql-query';
+  readonly title = 'MSSQL Query Tool';
+  readonly description =
+    'Executes read-only SQL through a deterministic adapter stub for structural previewing.';
+  readonly inputSchema = inputSchema;
+  readonly outputSchema = outputSchema;
 
-export function createMssqlTool(adapter: MssqlAdapter) {
-  const metadata: ToolMetadata<typeof inputSchema, typeof outputSchema> = {
-    name: MSSQL_TOOL_NAME,
-    title: 'MSSQL Query Tool',
-    description: 'Executes read-only SQL through a deterministic adapter stub for structural previewing.',
-    inputSchema,
-    outputSchema
-  };
+  constructor(private readonly adapter: MssqlAdapter) {}
 
-  const handler = async (params: MssqlQueryRequest) => {
+  handler = async (params: MssqlQueryRequest) => {
     const correlationId = uuidv4();
     const startedAt = new Date().toISOString();
 
     const queryResult = await withErrorPassthrough(
-      () => adapter.execute(params),
+      () => this.adapter.execute(params),
       { correlationId, context: { database: params.database } }
     );
 
     const completedAt = new Date().toISOString();
-
     const payload: MssqlQueryResponse = {
       correlationId,
       database: params.database,
@@ -73,26 +70,7 @@ export function createMssqlTool(adapter: MssqlAdapter) {
           type: 'text' as const,
           text: JSON.stringify(payload, null, 2)
         }
-      ],
-      structuredContent: payload
+      ]
     };
   };
-
-  return { ...metadata, handler };
-}
-
-export function registerMssqlTool(server: McpServer, adapter: MssqlAdapter) {
-  const tool = createMssqlTool(adapter);
-  server.registerTool(
-    tool.name,
-    {
-      title: tool.title,
-      description: tool.description,
-      inputSchema: tool.inputSchema,
-      outputSchema: tool.outputSchema
-    },
-    tool.handler
-  );
-
-  return tool;
 }

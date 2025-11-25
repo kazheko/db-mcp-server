@@ -17,11 +17,3 @@ export type MssqlQueryResponse = {
 export interface MssqlAdapter {
   execute(request: MssqlQueryRequest): Promise<QueryResultRow[]>;
 }
-
-export type ToolMetadata<TInput, TOutput> = {
-  name: string;
-  title: string;
-  description: string;
-  inputSchema: TInput;
-  outputSchema: TOutput;
-};

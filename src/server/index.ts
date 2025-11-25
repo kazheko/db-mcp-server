@@ -2,7 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { StubMssqlAdapter } from '../adapters/mssql.js';
-import { registerMssqlTool } from '../tools/mssql-query.js';
+import { ToolFactory } from '../tools/tool-factory.js';
 
 export const mcpServer = new McpServer({
   name: 'db-mcp-server',
@@ -10,7 +10,19 @@ export const mcpServer = new McpServer({
 });
 
 const adapter = new StubMssqlAdapter();
-registerMssqlTool(mcpServer, adapter);
+const factory = new ToolFactory();
+const mssqlTool = factory.createMssqlTool(adapter);
+
+mcpServer.registerTool(
+  mssqlTool.name,
+  {
+    title: mssqlTool.title,
+    description: mssqlTool.description,
+    inputSchema: mssqlTool.inputSchema,
+    outputSchema: mssqlTool.outputSchema
+  },
+  mssqlTool.handler
+);
 
 async function main() {
   const transport = new StdioServerTransport();
@@ -18,7 +30,7 @@ async function main() {
 }
 
 const entryFile = process.argv[1] ?? '';
-const isDirectRun = /server[\\/]index\.(ts|js)$/.test(entryFile);
+const isDirectRun = /server[\\/]index\.(ts|js)$/i.test(entryFile);
 
 if (isDirectRun) {
   main().catch((error) => {

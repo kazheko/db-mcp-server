@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { StubMssqlAdapter } from '../../src/adapters/mssql.js';
-import { createMssqlTool } from '../../src/tools/mssql-query.js';
+import { ToolFactory } from '../../src/tools/tool-factory.js';
 
 type ParsedArgs = Record<string, string | undefined>;
 
-type ToolResult = Awaited<ReturnType<ReturnType<typeof createMssqlTool>['handler']>>;
+type ToolResult = Awaited<ReturnType<ReturnType<ToolFactory['createMssqlTool']>['handler']>>;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const args: ParsedArgs = {};
@@ -22,25 +22,10 @@ function parseArgs(argv: string[]): ParsedArgs {
   return args;
 }
 
-function extractPayload(result: ToolResult) {
-  if (result.structuredContent) {
-    return result.structuredContent;
-  }
-  const textBlock = result.content?.[0]?.text;
-  if (textBlock) {
-    try {
-      return JSON.parse(textBlock);
-    } catch (error) {
-      console.warn('Unable to parse tool content as JSON, returning raw text.', error);
-    }
-  }
-  return result;
-}
-
 async function main() {
   const rawArgs = parseArgs(process.argv.slice(2));
   const adapter = new StubMssqlAdapter();
-  const tool = createMssqlTool(adapter);
+  const tool = new ToolFactory().createMssqlTool(adapter);
 
   if ('describe' in rawArgs) {
     console.log(
@@ -70,9 +55,9 @@ async function main() {
   }
 
   try {
-    const result = await tool.handler({ database, query, maxRows });
-    const payload = extractPayload(result);
-    console.log(JSON.stringify(payload, null, 2));
+    const result: ToolResult = await tool.handler({ database, query, maxRows });
+    const textPayload = result.content?.[0]?.text ?? '{}';
+    console.log(textPayload);
   } catch (error) {
     console.error('Tool execution failed:', error);
     process.exit(1);
