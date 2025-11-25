@@ -5,7 +5,7 @@ import { createMssqlTool } from '../../../src/tools/mssql-query.js';
 
 class ThrowingAdapter implements MssqlAdapter {
   constructor(private readonly errorToThrow: unknown) {}
-  async execute(_request: MssqlQueryRequest) {
+  async execute(_request: MssqlQueryRequest): Promise<never> {
     throw this.errorToThrow;
   }
 }

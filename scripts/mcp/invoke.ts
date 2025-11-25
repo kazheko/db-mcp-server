@@ -4,6 +4,8 @@ import { createMssqlTool } from '../../src/tools/mssql-query.js';
 
 type ParsedArgs = Record<string, string | undefined>;
 
+type ToolResult = Awaited<ReturnType<ReturnType<typeof createMssqlTool>['handler']>>;
+
 function parseArgs(argv: string[]): ParsedArgs {
   const args: ParsedArgs = {};
   for (let i = 0; i < argv.length; i += 1) {
@@ -20,13 +22,20 @@ function parseArgs(argv: string[]): ParsedArgs {
   return args;
 }
 
-const extractSchemaKeys = (schema: unknown): string[] => {
-  if (typeof schema === 'object' && schema && 'shape' in (schema as Record<string, unknown>)) {
-    const shape = (schema as { shape: Record<string, unknown> }).shape;
-    return Object.keys(shape);
+function extractPayload(result: ToolResult) {
+  if (result.structuredContent) {
+    return result.structuredContent;
   }
-  return [];
-};
+  const textBlock = result.content?.[0]?.text;
+  if (textBlock) {
+    try {
+      return JSON.parse(textBlock);
+    } catch (error) {
+      console.warn('Unable to parse tool content as JSON, returning raw text.', error);
+    }
+  }
+  return result;
+}
 
 async function main() {
   const rawArgs = parseArgs(process.argv.slice(2));
@@ -40,8 +49,8 @@ async function main() {
           name: tool.name,
           title: tool.title,
           description: tool.description,
-          inputFields: extractSchemaKeys(tool.inputSchema),
-          outputFields: extractSchemaKeys(tool.outputSchema)
+          inputFields: Object.keys((tool.inputSchema as { shape?: Record<string, unknown> }).shape ?? {}),
+          outputFields: Object.keys((tool.outputSchema as { shape?: Record<string, unknown> }).shape ?? {})
         },
         null,
         2
@@ -61,8 +70,9 @@ async function main() {
   }
 
   try {
-    const response = await tool.handler({ database, query, maxRows });
-    console.log(JSON.stringify(response, null, 2));
+    const result = await tool.handler({ database, query, maxRows });
+    const payload = extractPayload(result);
+    console.log(JSON.stringify(payload, null, 2));
   } catch (error) {
     console.error('Tool execution failed:', error);
     process.exit(1);

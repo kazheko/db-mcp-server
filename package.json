@@ -3,7 +3,7 @@
     "version":  "0.1.0",
     "description":  "Model Context Protocol server with MSSQL stub tool",
     "type":  "module",
-    "main":  "dist/server/index.js",
+    "main":  "dist/src/server/index.js",
     "scripts":  {
                     "build":  "tsc -p tsconfig.json",
                     "dev:mcp":  "tsx src/server/index.ts",

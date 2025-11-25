@@ -42,7 +42,26 @@
 2. Confirm the JSON includes the tool `name`, `title`, `description`, and the documented input/output fields (`database`, `query`, `maxRows` inputs + `correlationId`, `database`, `queryResult`, `startedAt`, `completedAt` outputs).
 3. MCP clients will see the same manifest content during the handshake phase, so any deviation here should block release.
 
+## Using MCP Inspector
+1. Build the project (once):
+   ```bash
+   npm run build
+   ```
+2. Launch the inspector by pointing it directly at the compiled server entry (note the `dist/src/server/index.js` path because `rootDir` is set to `.`):
+   ```bash
+   npx @modelcontextprotocol/inspector node dist/src/server/index.js
+   ```
+3. Once the Inspector UI opens, pick "DB MCP Server (local build)", confirm the `mssql-query` tool is listed, and exercise sample payloads.
+
 ## Testing
+1. Run all unit + contract tests:
+   ```bash
+   npm test
+   ```
+2. Focus on the adapter stub tests while iterating:
+   ```bash
+   npm run test:watch -- adapters
+   ```
 1. Run all unit + contract tests:
    ```bash
    npm test

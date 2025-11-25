@@ -3,25 +3,38 @@ import { describe, expect, it } from 'vitest';
 import { StubMssqlAdapter } from '../../src/adapters/mssql.js';
 import { createMssqlTool } from '../../src/tools/mssql-query.js';
 
+type ToolResult = Awaited<ReturnType<ReturnType<typeof createMssqlTool>['handler']>>;
+
 const invokeTool = async (input: Parameters<ReturnType<typeof createMssqlTool>['handler']>[0]) => {
   const adapter = new StubMssqlAdapter();
   const tool = createMssqlTool(adapter);
   return tool.handler(input);
 };
 
+const extractPayload = (result: ToolResult) => {
+  if (result.structuredContent) {
+    return result.structuredContent;
+  }
+  const text = result.content?.[0]?.text ?? '{}';
+  return JSON.parse(text);
+};
+
 describe('mssql-query tool contract', () => {
   it('returns deterministic metadata and JSON payload', async () => {
-    const response = await invokeTool({
+    const result = await invokeTool({
       database: 'hr',
       query: 'SELECT * FROM employees',
       maxRows: 5
     });
 
+    expect(result.content?.[0]?.type).toBe('text');
+    const response = extractPayload(result);
+
     expect(response.database).toBe('hr');
     expect(response.correlationId).toMatch(/^[0-9a-f-]{36}$/i);
     expect(new Date(response.startedAt).getTime()).toBeLessThanOrEqual(new Date(response.completedAt).getTime());
     expect(response.queryResult.length).toBe(5);
-    response.queryResult.forEach((row) => {
+    response.queryResult.forEach((row: Record<string, unknown>) => {
       expect(row).toHaveProperty('EmployeeId');
       expect(row).toHaveProperty('FullName');
     });
