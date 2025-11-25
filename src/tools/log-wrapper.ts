@@ -26,9 +26,10 @@ export class LogWrapper<TInputSchema, TOutputSchema, TRequest>
         content: [
           {
             type: 'text' as ToolContent['type'],
-            text: `Tool execution failed: ${message}`
+            text: `Error: ${message}`
           }
-        ]
+        ],
+        isError: true
       };
     }
   };
