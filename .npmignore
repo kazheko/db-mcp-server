@@ -1,0 +1,19 @@
+# Build artifacts
+/dist/
+/build/
+
+# Dependencies
+/node_modules/
+
+# Tests and specs
+/tests/
+/specs/
+
+# Local tooling and logs
+/.vscode/
+/.idea/
+*.log
+
+# Environment files
+.env
+.env.*

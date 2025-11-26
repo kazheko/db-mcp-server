@@ -9,5 +9,5 @@ export type ToolDefinition<TInputSchema, TOutputSchema, TRequest> = {
   description: string;
   inputSchema: TInputSchema;
   outputSchema: TOutputSchema;
-  handler: (params: TRequest) => Promise<{ content: ToolContent[] }>;
+  handler: (params: TRequest) => Promise<{ content: ToolContent[]; structuredContent?: { [x: string]: unknown }; isError?: boolean }>;
 };

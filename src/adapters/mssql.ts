@@ -1,104 +1,41 @@
-import type {
-  QueryAdapter,
-  MssqlQueryRequest,
-  QueryResultRow
-} from '../types/mssql.js';
+import mssql from 'mssql';
 
-const DEFAULT_ROW_COUNT = 3;
-const ERROR_TOKENS = ['RAISEERROR', 'THROW', 'SCRIPT_TIMEOUT'];
+import type { MssqlQueryRequest, QueryAdapter, QueryResultRow } from '../types/mssql.js';
+import { loadConnectionConfig } from './mssql-config.js';
 
-type StubTemplate = {
-  columns: { name: string; type: string; nullable?: boolean }[];
-  rows: string[][];
-};
+const DEFAULT_ROW_LIMIT = 100;
+const MAX_ROW_LIMIT = 1000;
 
-const templates: Record<string, StubTemplate> = {
-  employees: {
-    columns: [
-      { name: 'EmployeeId', type: 'int' },
-      { name: 'FullName', type: 'nvarchar' },
-      { name: 'Title', type: 'nvarchar', nullable: true }
-    ],
-    rows: [
-      ['1001', 'Ada Lovelace', 'Principal Engineer'],
-      ['1002', 'Grace Hopper', 'Distinguished Scientist'],
-      ['1003', 'Radia Perlman', 'Fellow'],
-      ['1004', 'Margaret Hamilton', 'Director of R&D']
-    ]
-  },
-  schemas: {
-    columns: [
-      { name: 'SchemaName', type: 'nvarchar' },
-      { name: 'ObjectCount', type: 'int' }
-    ],
-    rows: [
-      ['dbo', '142'],
-      ['hr', '38'],
-      ['sales', '56'],
-      ['audit', '17']
-    ]
-  },
-  default: {
-    columns: [
-      { name: 'ColumnName', type: 'nvarchar' },
-      { name: 'DataType', type: 'nvarchar' }
-    ],
-    rows: [
-      ['SampleColumn', 'nvarchar'],
-      ['SampleValue', 'int'],
-      ['SampleFlag', 'bit'],
-      ['SampleCreatedAt', 'datetime2']
-    ]
+export class MssqlAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
+  private readonly pool: mssql.ConnectionPool;
+
+  constructor(private readonly config = loadConnectionConfig()) {
+    this.pool = new mssql.ConnectionPool(this.config.rawConnectionString);
   }
-};
 
-function pickTemplate(query: string): StubTemplate {
-  const matched = Object.entries(templates).find(([key]) =>
-    key !== 'default' && query.toLowerCase().includes(key)
-  );
-  return matched?.[1] ?? templates.default;
-}
-
-export class StubMssqlAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
   async execute(request: MssqlQueryRequest): Promise<QueryResultRow[]> {
-    this.throwIfErrorScenario(request.query);
-    const template = pickTemplate(request.query);
-    const requestedRows = this.getRequestedRowCount(request.maxRows);
-    const rows = this.buildRows(template.rows, requestedRows);
-
-    return rows.map((row) => this.rowToObject(template.columns, row));
+    const pool = await this.ensurePool();
+    const result = await pool.request().query(request.query);
+    const rows = Array.isArray(result.recordset) ? result.recordset : [];
+    return this.limitRows(rows, request.maxRows);
   }
 
-  private buildRows(baseRows: string[][], maxRows: number): string[][] {
-    const result: string[][] = [];
-    for (let i = 0; i < maxRows; i += 1) {
-      const sourceRow = baseRows[i % baseRows.length];
-      result.push([...sourceRow]);
+  private async ensurePool() {
+    if (!this.pool.connected) {
+      await this.pool.connect();
     }
-    return result;
+    return this.pool;
   }
 
-  private rowToObject(
-    columns: StubTemplate['columns'],
-    row: string[]
-  ): QueryResultRow {
-    return columns.reduce<QueryResultRow>((acc, column, index) => {
-      acc[column.name] = row[index] ?? null;
-      return acc;
-    }, {});
+  private limitRows(rows: QueryResultRow[], maxRows?: number) {
+    const limit = this.resolveRowLimit(maxRows);
+    return rows.slice(0, limit);
   }
 
-  private getRequestedRowCount(maxRows?: number): number {
+  private resolveRowLimit(maxRows?: number) {
     if (typeof maxRows === 'number' && Number.isFinite(maxRows) && maxRows > 0) {
-      return Math.min(Math.floor(maxRows), 50);
+      return Math.min(Math.floor(maxRows), MAX_ROW_LIMIT);
     }
-    return DEFAULT_ROW_COUNT;
-  }
-
-  private throwIfErrorScenario(query: string): void {
-    const normalized = query.toUpperCase();
-    if (ERROR_TOKENS.some((token) => normalized.includes(token))) {
-      throw new Error('Script timeout simulated by MSSQL adapter stub');
-    }
+    return DEFAULT_ROW_LIMIT;
   }
 }

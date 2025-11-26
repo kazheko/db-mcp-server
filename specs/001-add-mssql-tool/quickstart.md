@@ -47,9 +47,9 @@
    ```bash
    npm run build
    ```
-2. Launch the inspector by pointing it directly at the compiled server entry (note the `dist/src/server/index.js` path because `rootDir` is set to `.`):
+2. Launch the inspector by pointing it directly at the compiled server entry with the `--env-file` flag to load `.env`:
    ```bash
-   npx @modelcontextprotocol/inspector node dist/src/server/index.js
+   npx @modelcontextprotocol/inspector node --env-file=.env dist/src/server/index.js
    ```
 3. Once the Inspector UI opens, pick "DB MCP Server (local build)", confirm the `mssql-query` tool is listed, and exercise sample payloads.
 

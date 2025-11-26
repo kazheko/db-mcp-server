@@ -1,35 +1,38 @@
 {
-    "name":  "db-mcp-server",
-    "version":  "0.1.0",
-    "description":  "Model Context Protocol server with MSSQL stub tool",
-    "type":  "module",
-    "main":  "dist/src/server/index.js",
-    "scripts":  {
-                    "build":  "tsc -p tsconfig.json",
-                    "dev:mcp":  "tsx src/server/index.ts",
-                    "mcp:invoke":  "tsx scripts/mcp/invoke.ts",
-                    "test":  "vitest run",
-                    "test:watch":  "vitest watch"
-                },
-    "keywords":  [
-                     "modelcontextprotocol",
-                     "mcp",
-                     "mssql",
-                     "stub"
-                 ],
-    "engines":  {
-                    "node":  "\u003e=20"
-                },
-    "license":  "MIT",
-    "dependencies":  {
-                         "@modelcontextprotocol/sdk":  "^1.22.0",
-                         "uuid":  "^11.0.3",
-                         "zod":  "^3.23.8"
-                     },
-    "devDependencies":  {
-                            "@types/node":  "^22.9.0",
-                            "typescript":  "^5.6.3",
-                            "tsx":  "^4.19.2",
-                            "vitest":  "^2.1.4"
-                        }
+    "name": "db-mcp-server",
+    "version": "0.1.0",
+    "description": "Model Context Protocol server with MSSQL stub tool",
+    "type": "module",
+    "main": "dist/src/server/index.js",
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "dev:mcp": "node --env-file=.env --import tsx src/server/index.ts",
+        "start": "node --env-file=.env dist/src/server/index.js",
+        "mcp:invoke": "node --env-file=.env --import tsx scripts/mcp/invoke.ts",
+        "test": "vitest run",
+        "test:watch": "vitest watch"
+    },
+    "keywords": [
+        "modelcontextprotocol",
+        "mcp",
+        "mssql",
+        "stub"
+    ],
+    "engines": {
+        "node": ">=20"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.22.0",
+        "mssql": "^10.0.4",
+        "uuid": "^11.0.3",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@types/mssql": "^9.1.8",
+        "@types/node": "^22.9.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.6.3",
+        "vitest": "^2.1.4"
+    }
 }

@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { StubMssqlAdapter } from '../adapters/mssql.js';
+import { MssqlAdapter } from '../adapters/mssql.js';
 import { ToolFactory } from '../tools/tool-factory.js';
 
 export const mcpServer = new McpServer({
@@ -9,7 +9,7 @@ export const mcpServer = new McpServer({
   version: '0.1.0'
 });
 
-const adapter = new StubMssqlAdapter();
+const adapter = new MssqlAdapter();
 const factory = new ToolFactory();
 const mssqlTool = factory.createMssqlTool(adapter);
 

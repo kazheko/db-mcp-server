@@ -17,7 +17,7 @@ const inputSchema = z.object({
     .int()
     .positive()
     .optional()
-    .describe('Optional cap on synthetic rows returned by the stub.')
+    .describe('Optional cap on rows returned by the live adapter execution.')
 });
 
 const outputSchema = z.object({
@@ -40,7 +40,7 @@ export class MssqlTool
   readonly name = 'mssql-query';
   readonly title = 'MSSQL Query Tool';
   readonly description =
-    'Executes read-only SQL through a deterministic adapter stub for structural previewing.';
+    'Executes read-only SQL through the live MSSQL adapter for structural previewing.';
   readonly inputSchema = inputSchema;
   readonly outputSchema = outputSchema;
 
@@ -67,7 +67,8 @@ export class MssqlTool
           type: 'text' as const,
           text: JSON.stringify(payload, null, 2)
         }
-      ]
+      ],
+      structuredContent: payload
     };
   };
 }

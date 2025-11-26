@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { StubMssqlAdapter } from '../../src/adapters/mssql.js';
+
+import { MssqlAdapter } from '../../src/adapters/mssql.js';
 import { ToolFactory } from '../../src/tools/tool-factory.js';
 
 type ParsedArgs = Record<string, string | undefined>;
@@ -24,7 +25,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 
 async function main() {
   const rawArgs = parseArgs(process.argv.slice(2));
-  const adapter = new StubMssqlAdapter();
+  const adapter = new MssqlAdapter();
   const tool = new ToolFactory().createMssqlTool(adapter);
 
   if ('describe' in rawArgs) {
