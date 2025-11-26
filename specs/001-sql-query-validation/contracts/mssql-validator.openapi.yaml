@@ -1,0 +1,109 @@
+openapi: 3.1.0
+info:
+  title: MSSQL Metadata Query Validator
+  version: 1.0.0
+  description: |
+    Decorator contract that validates MCP MSSQL tool requests before executing
+    them against SQL Server. Only metadata/statistics queries are forwarded.
+servers:
+  - url: https://mcp.local
+    description: MCP server process (tool invoked via MCP transport)
+paths:
+  /adapters/mssql/validate-query:
+    post:
+      summary: Validate and optionally execute a metadata query
+      description: |
+        Runs validation rules, returns strikethrough messaging on failure, and
+        forwards compliant requests to the MSSQL adapter.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Query passed validation and executed by the adapter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationSuccess'
+        '422':
+          description: Validation Error — unsafe or multi-statement query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '400':
+          description: Missing required database or query field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      required: [database, query]
+      properties:
+        database:
+          type: string
+          description: Explicit MSSQL database/catalog identifier
+          example: master
+        query:
+          type: string
+          description: Raw SQL text submitted by the MCP client
+          example: SELECT name, create_date FROM sys.databases ORDER BY name;
+        correlationId:
+          type: string
+          format: uuid
+          description: Trace identifier propagated across logs
+        context:
+          type: object
+          additionalProperties:
+            type: string
+          description: Optional metadata supplied by MCP clients
+    ValidationSuccess:
+      type: object
+      required: [status, forwarded, result]
+      properties:
+        status:
+          type: string
+          enum: [valid]
+        forwarded:
+          type: boolean
+          const: true
+        result:
+          type: object
+          description: Original adapter payload (schema/plan metadata)
+          additionalProperties: true
+    ValidationError:
+      type: object
+      required: [status, message, ruleId]
+      properties:
+        status:
+          type: string
+          enum: [invalid]
+        ruleId:
+          type: string
+          description: Identifier of the rule that failed
+          example: RULE_NO_DML
+        message:
+          type: string
+          description: User-facing error with strikethrough text
+          example: "**Validation Error** ~~INSERT INTO sys.tables(name) VALUES('foo')~~ — DML is forbidden"
+        struckQuery:
+          type: string
+          description: Markdown strikethrough snippet returned to MCP clients
+          example: "~~SELECT * FROM Customers~~"
+    BadRequest:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: string
+          enum: [invalid]
+        message:
+          type: string
+          example: "database parameter is required"
