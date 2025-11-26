@@ -2,6 +2,7 @@
 
 import { MssqlAdapter } from '../../src/adapters/mssql.js';
 import { ToolFactory } from '../../src/tools/tool-factory.js';
+import { MssqlValidator } from '../../src/adapters/validators/mssql-validator.js';
 
 type ParsedArgs = Record<string, string | undefined>;
 
@@ -26,7 +27,8 @@ function parseArgs(argv: string[]): ParsedArgs {
 async function main() {
   const rawArgs = parseArgs(process.argv.slice(2));
   const adapter = new MssqlAdapter();
-  const tool = new ToolFactory().createMssqlTool(adapter);
+  const validatedAdapter = new MssqlValidator(adapter);
+  const tool = new ToolFactory().createMssqlTool(validatedAdapter );
 
   if ('describe' in rawArgs) {
     console.log(

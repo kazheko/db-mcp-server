@@ -6,13 +6,18 @@ import type {
   QueryResultRow
 } from '../../src/types/mssql.js';
 import { ToolFactory } from '../../src/tools/tool-factory.js';
+import { MssqlValidator } from '../../src/adapters/validators/mssql-validator.js';
 
 const factory = new ToolFactory();
 
 class FakeAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
+  public callCount = 0;
+
   constructor(private readonly options: { rows?: QueryResultRow[]; error?: Error } = {}) {}
 
   async execute() {
+    this.callCount += 1;
+
     if (this.options.error) {
       throw this.options.error;
     }
@@ -24,7 +29,7 @@ const invokeTool = async (
   adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>,
   input: Parameters<ReturnType<ToolFactory['createMssqlTool']>['handler']>[0]
 ) => {
-  const tool = factory.createMssqlTool(adapter);
+  const tool = factory.createMssqlTool({ adapter });
   return tool.handler(input);
 };
 
@@ -63,7 +68,7 @@ describe('mssql-query tool contract', () => {
   });
 
   it('exposes manifest metadata for discovery', () => {
-    const tool = factory.createMssqlTool(new FakeAdapter());
+    const tool = factory.createMssqlTool({ adapter: new FakeAdapter() });
     expect(tool.title).toBe('MSSQL Query Tool');
     expect(tool.description).toMatch(/read-only/i);
 
@@ -84,3 +89,16 @@ describe('mssql-query tool contract', () => {
     expect(outputResult.success).toBe(true);
   });
 });
+  it('rejects DML before the adapter executes', async () => {
+    const baseAdapter = new FakeAdapter();
+    const decorated = new MssqlValidator(baseAdapter);
+
+    const result: ToolResult = await invokeTool(decorated, {
+      database: 'master',
+      query: 'INSERT INTO dbo.AuditLog VALUES (1)'
+    });
+
+    expect(baseAdapter.callCount).toBe(0);
+    expect(result.isError).toBe(true);
+    expect(result.content?.[0]?.text ?? '').toContain('Validation Error');
+  });

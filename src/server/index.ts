@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 import { MssqlAdapter } from '../adapters/mssql.js';
 import { ToolFactory } from '../tools/tool-factory.js';
+import { MssqlValidator } from '../adapters/validators/mssql-validator.js';
 
 export const mcpServer = new McpServer({
   name: 'db-mcp-server',
@@ -10,8 +11,9 @@ export const mcpServer = new McpServer({
 });
 
 const adapter = new MssqlAdapter();
+const validatedAdapter = new MssqlValidator(adapter);
 const factory = new ToolFactory();
-const mssqlTool = factory.createMssqlTool(adapter);
+const mssqlTool = factory.createMssqlTool(validatedAdapter);
 
 mcpServer.registerTool(
   mssqlTool.name,
