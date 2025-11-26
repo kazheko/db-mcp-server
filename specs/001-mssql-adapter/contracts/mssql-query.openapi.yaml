@@ -1,0 +1,77 @@
+openapi: 3.1.0
+info:
+  title: MSSQL Query MCP Tool
+  version: 0.1.0
+  description: >-
+    Executes a single SQL Server query via the live MCP adapter. Callers are expected
+    to provide read-only statements that target catalog or metadata views.
+servers:
+  - url: mcp://stdio
+    description: MCP stdio transport hosted by db-mcp-server
+paths:
+  /tools/mssql-query:invoke:
+    post:
+      summary: Execute a read-only metadata query via the MSSQL adapter
+      description: >-
+        Issues a single SELECT/WITH statement against SQL Server catalog views
+        using the server-wide `MSSQL_CONNECTION_STRING`. Validation of the SQL text
+        is currently delegated to callers per the feature specification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MssqlQueryRequest'
+      responses:
+        '200':
+          description: Successful metadata payload returned to the MCP client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MssqlQueryResponse'
+        '400':
+          description: Missing `database` or `query` parameters detected client-side
+        '500':
+          description: Underlying MSSQL driver error surfaced verbatim
+components:
+  schemas:
+    MssqlQueryRequest:
+      type: object
+      required: [database, query]
+      properties:
+        database:
+          type: string
+          description: Logical catalog label presented back to MCP clients.
+        query:
+          type: string
+          description: >-
+            Single read-only SELECT/WITH statement provided by the caller. The adapter
+            forwards it directly to SQL Server, so callers must avoid mutations.
+        maxRows:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Optional row limit (defaults to 100) applied before returning JSON rows.
+    MssqlQueryResponse:
+      type: object
+      required: [correlationId, database, queryResult, startedAt, completedAt]
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+          description: Identifier mirrored through logs and downstream MCP clients.
+        database:
+          type: string
+          description: Echo of the `database` request parameter.
+        queryResult:
+          type: array
+          description: JSON rows sourced from system catalog tables only.
+          items:
+            type: object
+            additionalProperties: {}
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
