@@ -40,6 +40,34 @@ paths:
           description: Underlying PostgreSQL driver error surfaced verbatim
 components:
   schemas:
+    QueryResponseEnvelope:
+      type: object
+      required: [correlationId, database, queryResult, startedAt, completedAt]
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+          description: Shared identifier echoed through logs and MCP responses.
+        database:
+          type: string
+          description: Echo of the logical database name provided in the request.
+        queryResult:
+          type: array
+          description: JSON rows limited to metadata/statistics data.
+          items:
+            type: object
+            additionalProperties: {}
+        startedAt:
+          type: string
+          format: date-time
+          description: ISO timestamp captured immediately before adapter invocation.
+        completedAt:
+          type: string
+          format: date-time
+          description: ISO timestamp captured immediately after adapter completion.
+        rowCount:
+          type: integer
+          description: Number of rows returned after enforcing the `maxRows` limit.
     PostgresMetadataQueryRequest:
       type: object
       required: [database, query]
@@ -59,29 +87,12 @@ components:
           default: 100
           description: Optional row cap applied before returning JSON data.
     PostgresMetadataQueryResponse:
-      type: object
-      required: [correlationId, database, queryResult, startedAt, completedAt]
-      properties:
-        correlationId:
-          type: string
-          format: uuid
-        database:
-          type: string
-        queryResult:
-          type: array
-          description: JSON rows from allowed catalog/statistics views only.
-          items:
-            type: object
-            additionalProperties: {}
-        startedAt:
-          type: string
-          format: date-time
-        completedAt:
-          type: string
-          format: date-time
-        rowCount:
-          type: integer
-          description: Count of rows returned (after truncation by `maxRows`).
+      allOf:
+        - $ref: '#/components/schemas/QueryResponseEnvelope'
+        - type: object
+          properties:
+            queryResult:
+              description: JSON rows sourced from `pg_catalog`/`information_schema` views only.
     ValidationErrorResponse:
       type: object
       required: [correlationId, message]

@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { QueryAdapter, MssqlQueryRequest, QueryResultRow } from '../../../src/mssql/types.js';
+import type { QueryAdapter, QueryRequest, QueryResultRow } from '../../../src/shared/queries.js';
 import { createMssqlTool } from '../../../src/mssql/tool.js';
 import { withLogging } from '../../../src/shared/logging.js';
 import { withMssqlValidation } from '../../../src/mssql/validator.js';
 
-class ThrowingAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
+class ThrowingAdapter implements QueryAdapter<QueryRequest, QueryResultRow[]> {
   constructor(private readonly errorToThrow: unknown) {}
-  async execute(_request: MssqlQueryRequest): Promise<QueryResultRow[]> {
+  async execute(_request: QueryRequest): Promise<QueryResultRow[]> {
     throw this.errorToThrow;
   }
 }
 
-const createTool = (adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>) =>
+const createTool = (adapter: QueryAdapter<QueryRequest, QueryResultRow[]>) =>
   withLogging(createMssqlTool(adapter));
 
 describe('mssql-query tool error handling', () => {
@@ -35,7 +35,7 @@ describe('mssql-query tool error handling', () => {
 
   it('returns the same payload when using a decorated adapter for valid queries', async () => {
     const rows = [{ name: 'sys.databases' }];
-    const baseAdapter: QueryAdapter<MssqlQueryRequest, typeof rows> = {
+    const baseAdapter: QueryAdapter<QueryRequest, typeof rows> = {
       execute: vi.fn(async () => rows)
     };
     const decorated = withMssqlValidation(baseAdapter);

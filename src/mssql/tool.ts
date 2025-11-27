@@ -3,10 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type {
   QueryAdapter,
-  MssqlQueryRequest,
-  MssqlQueryResponse,
+  QueryRequest,
+  QueryResponseEnvelope,
   QueryResultRow
-} from './types.js';
+} from '../shared/queries.js';
 import type { ToolDefinition } from '../tools/types.js';
 
 const inputSchema = z.object({
@@ -35,9 +35,9 @@ const outputSchema = z.object({
 });
 
 export const createMssqlTool = (
-  adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>
-): ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest> => {
-  const handler: ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest>['handler'] = async (
+  adapter: QueryAdapter<QueryRequest, QueryResultRow[]>
+): ToolDefinition<typeof inputSchema, typeof outputSchema, QueryRequest> => {
+  const handler: ToolDefinition<typeof inputSchema, typeof outputSchema, QueryRequest>['handler'] = async (
     params
   ) => {
     const correlationId = uuidv4();
@@ -46,10 +46,11 @@ export const createMssqlTool = (
     const queryResult = await adapter.execute(params);
 
     const completedAt = new Date().toISOString();
-    const payload: MssqlQueryResponse = {
+    const payload: QueryResponseEnvelope = {
       correlationId,
       database: params.database,
       queryResult,
+      rowCount: queryResult.length,
       startedAt,
       completedAt
     };

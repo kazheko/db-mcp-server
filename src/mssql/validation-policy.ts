@@ -1,17 +1,4 @@
-export interface ValidationPattern {
-  id: string;
-  expression: RegExp;
-  message?: string;
-}
-
-export interface ValidationPolicy {
-  id: string;
-  deniedStatements: Record<string, string[]>;
-  deniedTokens: string[];
-  deniedPatterns: ValidationPattern[];
-  multiStatementGuards: ValidationPattern[];
-  messageTemplates: Record<string, string>;
-}
+import type { ValidationPattern, ValidationPolicy } from '../shared/sql-validator.js';
 
 const statementTokens: ValidationPolicy['deniedStatements'] = {
   DDL: ['create', 'alter', 'drop', 'truncate'],

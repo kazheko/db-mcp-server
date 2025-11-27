@@ -1,15 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type {
-  MssqlQueryRequest,
-  QueryAdapter,
-  QueryResultRow
-} from '../../../src/mssql/types.js';
+import type { QueryAdapter, QueryRequest, QueryResultRow } from '../../../src/shared/queries.js';
 import { withMssqlValidation } from '../../../src/mssql/validator.js';
 
 const makeAdapter = (rows: QueryResultRow[] = []) => {
-  const execute = vi.fn(async (_request: MssqlQueryRequest) => rows);
-  const adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]> = {
+  const execute = vi.fn(async (_request: QueryRequest) => rows);
+  const adapter: QueryAdapter<QueryRequest, QueryResultRow[]> = {
     execute
   };
   return { adapter, execute };
@@ -20,7 +16,7 @@ describe('mssql validator', () => {
     const { adapter, execute } = makeAdapter([{ name: 'sys.tables' }]);
     const decorated = withMssqlValidation(adapter);
 
-    const request: MssqlQueryRequest = {
+    const request: QueryRequest = {
       database: 'master',
       query: 'SELECT name FROM sys.tables'
     };

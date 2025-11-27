@@ -1,6 +1,6 @@
 import mssql from 'mssql';
 
-import type { MssqlQueryRequest, QueryAdapter, QueryResultRow } from './types.js';
+import type { QueryAdapter, QueryRequest, QueryResultRow } from '../shared/queries.js';
 import { loadConnectionConfig } from '../adapters/mssql-config.js';
 
 const DEFAULT_ROW_LIMIT = 100;
@@ -20,7 +20,7 @@ const limitRows = (rows: QueryResultRow[], maxRows?: number) => {
 
 export const createMssqlAdapter = (
   config = loadConnectionConfig()
-): QueryAdapter<MssqlQueryRequest, QueryResultRow[]> => {
+): QueryAdapter<QueryRequest, QueryResultRow[]> => {
   const pool = new mssql.ConnectionPool(config.rawConnectionString);
 
   const ensurePool = async () => {

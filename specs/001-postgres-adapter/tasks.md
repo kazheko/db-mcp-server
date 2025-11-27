@@ -31,11 +31,11 @@ description: "Task list for implementing the PostgreSQL adapter feature"
 
 **Purpose**: Establish reusable query contracts and validation utilities before introducing the Postgres slice.
 
-- [ ] T003 Create `src/shared/queries.ts` defining the reusable `QueryAdapter`, `QueryRequest`, and `QueryResponseEnvelope` types described in plan.md.
-- [ ] T004 [P] Refactor `src/mssql/types.ts` to re-export the shared query contracts from `src/shared/queries.ts`, removing duplicated interfaces.
-- [ ] T005 [P] Update `src/mssql/adapter.ts` to consume the shared query contracts and ensure existing tool wiring compiles without local types.
-- [ ] T006 [P] Promote the validation decorator logic from `src/mssql/validator.ts` into a new shared module `src/shared/sql-validator.ts` so adapters can wrap themselves uniformly.
-- [ ] T007 [P] Rewire `src/mssql/validator.ts` to import the shared validator, keep the `withMssqlValidation` entry point, and confirm exports stay backward compatible.
+- [X] T003 Create `src/shared/queries.ts` defining the reusable `QueryAdapter`, `QueryRequest`, and `QueryResponseEnvelope` types described in plan.md.
+- [X] T004 [P] Refactor `src/mssql/types.ts` to re-export the shared query contracts from `src/shared/queries.ts`, removing duplicated interfaces.
+- [X] T005 [P] Update `src/mssql/adapter.ts` to consume the shared query contracts and ensure existing tool wiring compiles without local types.
+- [X] T006 [P] Promote the validation decorator logic from `src/mssql/validator.ts` into a new shared module `src/shared/sql-validator.ts` so adapters can wrap themselves uniformly.
+- [X] T007 [P] Rewire `src/mssql/validator.ts` to import the shared validator, keep the `withMssqlValidation` entry point, and confirm exports stay backward compatible.
 
 **Checkpoint**: Shared query + validation infrastructure ready; PostgreSQL-specific work can proceed.
 
@@ -49,10 +49,10 @@ description: "Task list for implementing the PostgreSQL adapter feature"
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Author the Postgres validation policy in `src/postgres/validation-policy.ts`, mirroring allowed schemas (`pg_catalog`, `information_schema`) and denial lists from research.md.
-- [ ] T009 [P] [US1] Create `src/postgres/validator.ts` that invokes the shared `withSqlValidation` helper with the Postgres policy to enforce single-statement metadata queries.
-- [ ] T010 [US1] Implement `src/postgres/adapter.ts` that builds a `pg.Pool`, applies the validator before execution, enforces `maxRows`, and returns the shared response envelope with timestamps/row counts.
-- [ ] T011 [P] [US1] Extend `scripts/mcp/invoke.ts` to add a Postgres invocation path (flag or command) so operators can manually run allowed queries and capture validation failures for documentation.
+- [X] T008 [US1] Author the Postgres validation policy in `src/postgres/validation-policy.ts`, mirroring allowed schemas (`pg_catalog`, `information_schema`) and denial lists from research.md.
+- [X] T009 [P] [US1] Create `src/postgres/validator.ts` that invokes the shared `withSqlValidation` helper with the Postgres policy to enforce single-statement metadata queries.
+- [X] T010 [US1] Implement `src/postgres/adapter.ts` that builds a `pg.Pool`, applies the validator before execution, enforces `maxRows`, and returns the shared response envelope with timestamps/row counts.
+- [X] T011 [P] [US1] Extend `scripts/mcp/invoke.ts` to add a Postgres invocation path (flag or command) so operators can manually run allowed queries and capture validation failures for documentation.
 
 **Checkpoint**: Postgres adapter executes validated metadata queries end-to-end independent of other stories.
 
@@ -66,9 +66,9 @@ description: "Task list for implementing the PostgreSQL adapter feature"
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Implement the env loader `src/adapters/postgres-config.ts` that trims, validates (`postgres://` scheme, host, database, optional sslmode), and returns config per data-model guidance.
-- [ ] T013 [US2] Wire the env loader + descriptive startup errors into the Postgres adapter factory in `src/postgres/adapter.ts`, ensuring missing/malformed strings throw before pool creation.
-- [ ] T014 [P] [US2] Create `docs/postgres-adapter.md` (or update existing onboarding doc) documenting variable setup, rotation steps, and restart requirements referenced by quickstart.md.
+- [X] T012 [US2] Implement the env loader `src/adapters/postgres-config.ts` that trims, validates (`postgres://` scheme, host, database, optional sslmode), and returns config per data-model guidance.
+- [X] T013 [US2] Wire the env loader + descriptive startup errors into the Postgres adapter factory in `src/postgres/adapter.ts`, ensuring missing/malformed strings throw before pool creation.
+- [X] T014 [P] [US2] Create `docs/postgres-adapter.md` (or update existing onboarding doc) documenting variable setup, rotation steps, and restart requirements referenced by quickstart.md.
 
 **Checkpoint**: Configuration can be managed entirely through environment variables with clear operator guidance.
 
@@ -82,8 +82,8 @@ description: "Task list for implementing the PostgreSQL adapter feature"
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Create `src/postgres/index.ts` that exports the adapter factory, `PostgresMetadataQuery` types, and shared query envelope bindings to mirror the MSSQL exports.
-- [ ] T016 [US3] Update `specs/001-postgres-adapter/contracts/postgres-metadata-query.openapi.yaml` so request/response schemas explicitly reference the shared fields (correlationId, timestamps, rowCount) and align with the adapter outputs.
+- [X] T015 [US3] Create `src/postgres/index.ts` that exports the adapter factory, `PostgresMetadataQuery` types, and shared query envelope bindings to mirror the MSSQL exports.
+- [X] T016 [US3] Update `specs/001-postgres-adapter/contracts/postgres-metadata-query.openapi.yaml` so request/response schemas explicitly reference the shared fields (correlationId, timestamps, rowCount) and align with the adapter outputs.
 
 **Checkpoint**: Shared contracts proven; Postgres adapter can be consumed by future MCP tools without new type plumbing.
 
@@ -93,8 +93,8 @@ description: "Task list for implementing the PostgreSQL adapter feature"
 
 **Purpose**: Final validation and documentation updates affecting multiple stories.
 
-- [ ] T017 Run the quickstart scenario from `docs/postgres-adapter.md` using `scripts/mcp/invoke.ts` to capture a successful metadata query plus a validation error example for release notes.
-- [ ] T018 [P] Update `AGENTS.md` with the finalized Postgres adapter tech stack + environment expectations so future agents inherit the new context.
+- [X] T017 Run the quickstart scenario from `docs/postgres-adapter.md` using `scripts/mcp/invoke.ts` to capture a successful metadata query plus a validation error example for release notes.
+- [X] T018 [P] Update `AGENTS.md` with the finalized Postgres adapter tech stack + environment expectations so future agents inherit the new context.
 
 ---
 

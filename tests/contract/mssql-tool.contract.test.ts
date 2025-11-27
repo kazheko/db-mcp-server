@@ -1,18 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import type {
-  MssqlQueryRequest,
-  QueryAdapter,
-  QueryResultRow
-} from '../../src/mssql/types.js';
+import type { QueryAdapter, QueryRequest, QueryResultRow } from '../../src/shared/queries.js';
 import { createMssqlTool } from '../../src/mssql/tool.js';
 import { withLogging } from '../../src/shared/logging.js';
 import { withMssqlValidation } from '../../src/mssql/validator.js';
 
-const createTool = (adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>) =>
+const createTool = (adapter: QueryAdapter<QueryRequest, QueryResultRow[]>) =>
   withLogging(createMssqlTool(adapter));
 
-class FakeAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
+class FakeAdapter implements QueryAdapter<QueryRequest, QueryResultRow[]> {
   public callCount = 0;
 
   constructor(private readonly options: { rows?: QueryResultRow[]; error?: Error } = {}) {}
@@ -28,8 +24,8 @@ class FakeAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
 }
 
 const invokeTool = async (
-  adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>,
-  input: MssqlQueryRequest
+  adapter: QueryAdapter<QueryRequest, QueryResultRow[]>,
+  input: QueryRequest
 ) => {
   const tool = createTool(adapter);
   return tool.handler(input);
