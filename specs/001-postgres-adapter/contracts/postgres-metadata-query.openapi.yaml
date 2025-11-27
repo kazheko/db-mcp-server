@@ -1,0 +1,94 @@
+openapi: 3.1.0
+info:
+  title: PostgreSQL Metadata Adapter Invocation
+  version: 0.1.0
+  description: >-
+    Describes the adapter-level contract that the future MCP tool will call to
+    execute validated, read-only PostgreSQL metadata queries using the shared
+    `QueryAdapter` envelope.
+servers:
+  - url: mcp://stdio
+    description: Internal MCP stdio transport hosted by db-mcp-server
+paths:
+  /adapters/postgres/metadata-query:
+    post:
+      summary: Execute a validated metadata query via the PostgreSQL adapter
+      description: >-
+        Issues a single SELECT/WITH/EXPLAIN statement targeting system catalogs
+        through the adapter after the SQL validation decorator approves it.
+        Configuration is sourced exclusively from `POSTGRES_CONNECTION_STRING`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostgresMetadataQueryRequest'
+      responses:
+        '200':
+          description: Successful metadata payload returned to the caller
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresMetadataQueryResponse'
+        '422':
+          description: Validation decorator rejected the SQL statement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Underlying PostgreSQL driver error surfaced verbatim
+components:
+  schemas:
+    PostgresMetadataQueryRequest:
+      type: object
+      required: [database, query]
+      properties:
+        database:
+          type: string
+          description: Logical label echoed back to MCP clients for context.
+        query:
+          type: string
+          description: >-
+            Single read-only SQL statement. Must target `pg_catalog`,
+            `information_schema`, or statistics views and omit DDL/DML keywords.
+        maxRows:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 100
+          description: Optional row cap applied before returning JSON data.
+    PostgresMetadataQueryResponse:
+      type: object
+      required: [correlationId, database, queryResult, startedAt, completedAt]
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        database:
+          type: string
+        queryResult:
+          type: array
+          description: JSON rows from allowed catalog/statistics views only.
+          items:
+            type: object
+            additionalProperties: {}
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        rowCount:
+          type: integer
+          description: Count of rows returned (after truncation by `maxRows`).
+    ValidationErrorResponse:
+      type: object
+      required: [correlationId, message]
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+        message:
+          type: string
+          description: Strikethrough-formatted SQL plus "Validation Error" label.
