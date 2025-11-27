@@ -43,10 +43,7 @@ export const createPostgresAdapter = (
     async execute(request) {
       const client = await pool.connect();
       try {
-        const result = await client.query({
-          text: request.query,
-          rowMode: 'object'
-        });
+        const result = await client.query(request.query);
         const rows = Array.isArray(result.rows) ? result.rows : [];
         return limitRows(rows, request.maxRows);
       } finally {
