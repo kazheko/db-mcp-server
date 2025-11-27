@@ -46,15 +46,18 @@ specs/001-mssql-adapter/
 
 ```text
 src/
-├── adapters/
-│   └── mssql.ts                  # Real MSSQL adapter implementation
+├── mssql/
+│   ├── adapter.ts              # Real MSSQL adapter implementation
+│   ├── validator.ts            # Query validation HOF
+│   ├── validation-policy.ts
+│   ├── tool.ts                 # Tool schema + runtime
+│   └── types.ts                # Shared contracts used by tools/adapters
+├── shared/
+│   └── logging.ts              # Error-wrapping higher-order function
 ├── server/
-│   └── index.ts                  # MCP entry that wires adapters/tools
-├── tools/
-│   ├── mssql-tool.ts             # Tool schema + factory function
-│   └── log-wrapper.ts            # Error-wrapping higher-order function
-└── types/
-    └── mssql.ts                  # Shared contracts used by tools/adapters
+│   └── index.ts                # MCP entry that wires adapters/tools
+└── adapters/
+    └── mssql-config.ts         # Connection configuration loader
 
 tests/
 ├── contract/
@@ -67,7 +70,7 @@ scripts/
 └── mcp/invoke.ts                 # Manual invocation harness
 ```
 
-**Structure Decision**: Keep the single-project Node.js layout; concentrate feature work inside `src/adapters/mssql.ts`, `src/server/index.ts`, and the existing test directories while adding documentation artifacts under `specs/001-mssql-adapter/`.
+**Structure Decision**: Keep the single-project Node.js layout; concentrate feature work inside the vertical `src/mssql` module (`adapter.ts`, `tool.ts`, `validator.ts`), plus `src/server/index.ts` and the existing test directories while adding documentation artifacts under `specs/001-mssql-adapter/`.
 
 ## Complexity Tracking
 

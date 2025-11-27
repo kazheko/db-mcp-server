@@ -18,7 +18,7 @@ vi.mock('../../../src/adapters/mssql-config.js', () => ({
   loadConnectionConfig: vi.fn(() => configMock)
 }));
 
-import { createMssqlAdapter } from '../../../src/adapters/mssql.js';
+import { createMssqlAdapter } from '../../../src/mssql/adapter.js';
 
 describe('MssqlAdapter', () => {
   beforeEach(() => {

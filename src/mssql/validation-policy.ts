@@ -54,7 +54,7 @@ const deniedPatterns: ValidationPattern[] = [
 const multiStatementGuards: ValidationPattern[] = [
   {
     id: 'MULTI_STATEMENT_SEMICOLON',
-    expression: /;\s*\S+/,
+    expression: /;\s*\S+/, 
     message: 'Only a single SQL statement may be executed per request'
   },
   {
@@ -79,7 +79,7 @@ export const defaultValidationPolicy: ValidationPolicy = {
     SECURITY: 'Privilege changes (GRANT/REVOKE) are not allowed',
     BACKUP: 'Backup and restore operations are not allowed',
     TEMP_TABLE: 'Temporary tables are not allowed',
-    DENIED_TOKEN: 'Query contains a forbidden token',
+    DENIED_TOKEN: 'Query contains a forbidden statement',
     MULTI_STATEMENT: 'Only a single SQL statement may be executed per request',
     MISSING_DATABASE: 'database field is required',
     MISSING_QUERY: 'query field is required'

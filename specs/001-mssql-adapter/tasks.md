@@ -1,6 +1,6 @@
 # Tasks: Real MSSQL Adapter Integration
 
-**Input**: Design documents from `specs\001-mssql-adapter\`
+**Input**: Design documents from `specs/001-mssql-adapter/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/mssql-query.openapi.yaml
 
 **Tests**: Add or update Vitest suites only where stories require explicit verification.
@@ -9,7 +9,7 @@
 
 - `[P]` indicates tasks that can proceed in parallel once their phase prerequisites finish.
 - `[US#]` ties a task directly to a user story from `spec.md`.
-- All file paths below are absolute to avoid ambiguity.
+- All file paths below are repository-relative to avoid ambiguity.
 
 ---
 
@@ -26,9 +26,9 @@
 
 **Purpose**: Core wiring that every user story depends on (connection metadata, shared types, and testing hooks).
 
-- [X] T003 Implement `loadConnectionConfig()` in `src\adapters\mssql-config.ts` to read `MSSQL_CONNECTION_STRING`, trim it, and expose a typed `MssqlConnectionConfig` object shared by all adapters.
-- [X] T004 Extend `src\types\mssql.ts` with the `MssqlConnectionConfig`, `MssqlMetadataQuery`, and `MssqlQueryResult` interfaces referenced in the data model so adapters and tools share the same contracts.
-- [X] T005 [P] Add a reusable mock for the `mssql` driver under `tests\unit\adapters\__mocks__\mssql.ts` (plus a helper index) so later Vitest suites can simulate connection pools without a live server.
+- [X] T003 Implement `loadConnectionConfig()` in `src/adapters/mssql-config.ts` to read `MSSQL_CONNECTION_STRING`, trim it, and expose a typed `MssqlConnectionConfig` object shared by all adapters.
+- [X] T004 Extend `src/mssql/types.ts` with the `MssqlConnectionConfig`, `MssqlMetadataQuery`, and `MssqlQueryResult` interfaces referenced in the data model so adapters and tools share the same contracts.
+- [X] T005 [P] Add a reusable mock for the `mssql` driver under `tests/unit/adapters/__mocks__/mssql.ts` (plus a helper index) so later Vitest suites can simulate connection pools without a live server.
 
 **Checkpoint**: Connection metadata, shared types, and mocking hooks exist; user-story work can start.
 
@@ -42,11 +42,11 @@
 
 ### Implementation
 
-- [X] T006 [US1] Rewrite `src\adapters\mssql.ts` to instantiate a singleton `mssql.ConnectionPool`, execute the provided SQL, cap returned rows to `maxRows`, and propagate driver errors untouched.
-- [X] T007 [US1] Update `src\server\index.ts` so it constructs the new adapter via `loadConnectionConfig()` instead of `StubMssqlAdapter`, ensuring only the production adapter is registered with the MCP server.
-- [X] T008 [P] [US1] Refresh `src\tools\mssql-tool.ts` (and related logging helper) to describe the real adapter (no “deterministic stub”) and confirm the handler still emits `correlationId`, timing fields, and JSON rows.
-- [X] T009 [US1] Expand `tests\unit\adapters\mssql.test.ts` to mock the driver, covering success rows, row-capping, and error propagation from `mssql.Request.execute`.
-- [X] T010 [US1] Update `tests\contract\mssql-tool.contract.test.ts` to assert the MCP tool streams the adapter payload verbatim (content + errors) instead of the old synthetic rows.
+- [X] T006 [US1] Rewrite `src/mssql/adapter.ts` to instantiate a singleton `mssql.ConnectionPool`, execute the provided SQL, cap returned rows to `maxRows`, and propagate driver errors untouched.
+- [X] T007 [US1] Update `src/server/index.ts` so it composes the adapter via `createMssqlAdapter()` instead of `StubMssqlAdapter`, ensuring only the production adapter is registered with the MCP server.
+- [X] T008 [P] [US1] Refresh `src/mssql/tool.ts` (and related logging helper) to describe the real adapter (no “deterministic stub”) and confirm the handler still emits `correlationId`, timing fields, and JSON rows.
+- [X] T009 [US1] Expand `tests/unit/adapters/mssql.test.ts` to mock the driver, covering success rows, row-capping, and error propagation from `mssql.Request.execute`.
+- [X] T010 [US1] Update `tests/contract/mssql-tool.contract.test.ts` to assert the MCP tool streams the adapter payload verbatim (content + errors) instead of the old synthetic rows.
 
 **Checkpoint**: Operators can run real read-only queries end-to-end via MCP using the environment connection string.
 
@@ -60,9 +60,9 @@
 
 ### Implementation
 
-- [X] T011 [US2] Enhance `src\adapters\mssql-config.ts` with defensive checks (empty string, malformed prefix) that throw descriptive startup errors before any pool connects.
-- [X] T012 [P] [US2] Add Vitest coverage to `tests\unit\adapters\mssql-config.test.ts` proving missing or malformed environment variables cause the adapter bootstrap to reject.
-- [X] T013 [P] [US2] Update `specs\001-mssql-adapter\quickstart.md` (and reference it from `.env.example`) so operators know how to set, rotate, and restart after changing `MSSQL_CONNECTION_STRING`.
+- [X] T011 [US2] Enhance `src/adapters/mssql-config.ts` with defensive checks (empty string, malformed prefix) that throw descriptive startup errors before any pool connects.
+- [X] T012 [P] [US2] Add Vitest coverage to `tests/unit/adapters/mssql-config.test.ts` proving missing or malformed environment variables cause the adapter bootstrap to reject.
+- [X] T013 [P] [US2] Update `specs/001-mssql-adapter/quickstart.md` (and reference it from `.env.example`) so operators know how to set, rotate, and restart after changing `MSSQL_CONNECTION_STRING`.
 
 **Checkpoint**: Connection strings are controlled centrally, validated on launch, and fully documented.
 
@@ -76,8 +76,8 @@
 
 ### Implementation
 
-- [X] T014 [US3] Delete the stub-specific templates, constants, and `StubMssqlAdapter` export from `src\adapters\mssql.ts`, leaving only the real adapter implementation.
-- [X] T015 [P] [US3] Remove any lingering `StubMssqlAdapter` imports/usages from `src\server\index.ts`, `tests`, and `scripts\mcp\invoke.ts` so build artifacts can’t reference the stub.
+- [X] T014 [US3] Delete the stub-specific templates, constants, and `StubMssqlAdapter` export from `src/mssql/adapter.ts`, leaving only the real adapter implementation.
+- [X] T015 [P] [US3] Remove any lingering `StubMssqlAdapter` imports/usages from `src/server/index.ts`, `tests`, and `scripts/mcp/invoke.ts` so build artifacts can’t reference the stub.
 - [X] T016 [P] [US3] Update the manual notes in `AGENTS.md` and related docs to drop references to “deterministic stub” now that only the real adapter remains.
 
 **Checkpoint**: Repository, tests, and docs contain zero stub references.
@@ -88,8 +88,8 @@
 
 **Purpose**: Final verification and docs cleanup across stories.
 
-- [X] T017 [P] Refresh `specs\001-mssql-adapter\contracts\mssql-query.openapi.yaml` so descriptions match the real adapter behavior (no stub wording, no premature SQL validation claims).
-- [X] T018 Run `npm run build` and `npm test` from `` to ensure TypeScript outputs and Vitest suites pass with the new driver on CI.
+- [X] T017 [P] Refresh `specs/001-mssql-adapter/contracts/mssql-query.openapi.yaml` so descriptions match the real adapter behavior (no stub wording, no premature SQL validation claims).
+- [X] T018 Run `npm run build` and `npm test` from repo root to ensure TypeScript outputs and Vitest suites pass with the new driver on CI.
 
 ---
 

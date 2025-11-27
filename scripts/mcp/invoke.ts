@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { createMssqlAdapter } from '../../src/adapters/mssql.js';
-import { withMssqlValidation } from '../../src/adapters/validators/mssql-validator.js';
-import { createMssqlTool } from '../../src/tools/mssql-tool.js';
-import { withLogging } from '../../src/tools/log-wrapper.js';
+import { createMssqlAdapter } from '../../src/mssql/adapter.js';
+import { withMssqlValidation } from '../../src/mssql/validator.js';
+import { createMssqlTool } from '../../src/mssql/tool.js';
+import { withLogging } from '../../src/shared/logging.js';
 
 type ParsedArgs = Record<string, string | undefined>;
 

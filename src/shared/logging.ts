@@ -1,4 +1,4 @@
-import type { ToolContent, ToolDefinition } from './types.js';
+import type { ToolContent, ToolDefinition } from '../tools/types.js';
 
 export const withLogging = <TInputSchema, TOutputSchema, TRequest>(
   inner: ToolDefinition<TInputSchema, TOutputSchema, TRequest>

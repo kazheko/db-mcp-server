@@ -1,10 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { createMssqlAdapter } from '../adapters/mssql.js';
-import { withMssqlValidation } from '../adapters/validators/mssql-validator.js';
-import { createMssqlTool } from '../tools/mssql-tool.js';
-import { withLogging } from '../tools/log-wrapper.js';
+import { createMssqlAdapter } from '../mssql/adapter.js';
+import { withMssqlValidation } from '../mssql/validator.js';
+import { createMssqlTool } from '../mssql/tool.js';
+import { withLogging } from '../shared/logging.js';
 
 export const mcpServer = new McpServer({
   name: 'db-mcp-server',

@@ -15,7 +15,7 @@
 **Purpose**: Establish the Node.js/TypeScript workspace and directory skeleton described in plan.md.
 
 - [X] T001 Update Node/TypeScript targets and dependency stubs in `package.json` and `tsconfig.json` for Node 20 + TypeScript 5 baseline.
-- [X] T002 [P] Scaffold required source folders/files (`src/server/index.ts`, `src/tools/mssql-tool.ts`, `src/tools/tool-factory.ts`, `src/tools/log-wrapper.ts`, `src/adapters/mssql.ts`, `src/types/mssql.ts`) per plan structure.
+- [X] T002 [P] Scaffold required source folders/files (`src/server/index.ts`, `src/mssql/tool.ts`, `src/shared/logging.ts`, `src/mssql/adapter.ts`, `src/mssql/types.ts`) per plan structure.
 - [X] T003 [P] Add npm scripts for `dev:mcp`, `mcp:invoke`, and `test` workflows referenced in quickstart within `package.json`.
 
 ---
@@ -24,8 +24,8 @@
 
 **Purpose**: Core infrastructure needed before user-story-specific behavior.
 
-- [X] T004 Define shared MSSQL adapter request/response interfaces and queryResult shapes in `src/types/mssql.ts`.
-- [X] T005 [P] Implement the reusable logging/error decorator in `src/tools/log-wrapper.ts` with placeholders for future enhancements.
+- [X] T004 Define shared MSSQL adapter request/response interfaces and queryResult shapes in `src/mssql/types.ts`.
+- [X] T005 [P] Implement the reusable logging/error decorator in `src/shared/logging.ts` with placeholders for future enhancements.
 - [X] T006 [P] Configure Vitest (ESM + ts-node/tsx) and create base folder structure in `vitest.config.ts`, `tests/contract/`, and `tests/unit/`.
 - [X] T007 Initialize the MCP server bootstrap with the official SDK (connection wiring only) in `src/server/index.ts`.
 
@@ -33,7 +33,7 @@
 
 ---
 
-## Phase 3: User Story 1 - Execute MSSQL query via stub adapter (Priority: P1) — MVP
+## Phase 3: User Story 1 - Execute MSSQL query via stub adapter (Priority: P1) ? MVP
 
 **Goal**: Allow LLM clients to call the `mssql-query` tool and receive deterministic structural queryResults with correlation/timestamp metadata.
 
@@ -46,8 +46,8 @@
 
 ### Implementation
 
-- [X] T010 [US1] Implement the deterministic MSSQL adapter stub honoring `maxRows` in `src/adapters/mssql.ts`.
-- [X] T011 [US1] Build the tool handler that generates correlation IDs/timestamps and delegates to the adapter in `src/tools/mssql-tool.ts`.
+- [X] T010 [US1] Implement the deterministic MSSQL adapter stub honoring `maxRows` in `src/mssql/adapter.ts`.
+- [X] T011 [US1] Build the tool handler that generates correlation IDs/timestamps and delegates to the adapter in `src/mssql/tool.ts`.
 - [X] T012 [US1] Register `mssql-query` with the MCP server bootstrap so it appears in the manifest in `src/server/index.ts`.
 - [X] T013 [US1] Wire the CLI invocation helper and npm command used in quickstart (`scripts/mcp/invoke.ts` + `package.json`).
 
@@ -68,7 +68,7 @@
 ### Implementation
 
 - [X] T015 [US2] Finalize the error handler to serialize and forward raw adapter errors in `src/errors/handler.ts`.
-- [X] T016 [US2] Ensure the logging decorator wraps tool execution so failures emit structured error content in `src/tools/log-wrapper.ts`.
+- [X] T016 [US2] Ensure the logging decorator wraps tool execution so failures emit structured error content in `src/shared/logging.ts`.
 
 **Checkpoint**: User Stories 1+2 independently verifiable.
 
@@ -86,7 +86,7 @@
 
 ### Implementation
 
-- [X] T018 [US3] Populate the tool definition with the canonical title, description, and schema definitions in `src/tools/mssql-tool.ts`.
+- [X] T018 [US3] Populate the tool definition with the canonical title, description, and schema definitions in `src/mssql/tool.ts`.
 - [X] T019 [US3] Ensure the server handshake advertises the enriched tool metadata in `src/server/index.ts`.
 - [X] T020 [US3] Document manifest discovery steps and expected schema output in `specs/001-add-mssql-tool/quickstart.md`.
 
@@ -128,6 +128,7 @@
 2. Layer in transparent error propagation (Phase 4) to unblock troubleshooting workflows.
 3. Finalize metadata discovery (Phase 5) so clients can self-describe the tool.
 4. Run Polish tasks (Phase 6) to validate the quickstart and capture lessons for future adapters.
+
 
 
 

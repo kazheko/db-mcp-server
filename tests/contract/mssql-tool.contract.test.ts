@@ -4,10 +4,10 @@ import type {
   MssqlQueryRequest,
   QueryAdapter,
   QueryResultRow
-} from '../../src/types/mssql.js';
-import { createMssqlTool } from '../../src/tools/mssql-tool.js';
-import { withLogging } from '../../src/tools/log-wrapper.js';
-import { withMssqlValidation } from '../../src/adapters/validators/mssql-validator.js';
+} from '../../src/mssql/types.js';
+import { createMssqlTool } from '../../src/mssql/tool.js';
+import { withLogging } from '../../src/shared/logging.js';
+import { withMssqlValidation } from '../../src/mssql/validator.js';
 
 const createTool = (adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>) =>
   withLogging(createMssqlTool(adapter));

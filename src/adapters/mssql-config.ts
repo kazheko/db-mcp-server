@@ -1,4 +1,4 @@
-import type { MssqlConnectionConfig } from '../types/mssql.js';
+import type { MssqlConnectionConfig } from '../mssql/types.js';
 
 const CONNECTION_ENV_KEY = 'MSSQL_CONNECTION_STRING';
 const SERVER_SEGMENT_PATTERN = /(Server|Data Source)\s*=/i;

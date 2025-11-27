@@ -4,8 +4,8 @@ import type {
   MssqlQueryRequest,
   QueryAdapter,
   QueryResultRow
-} from '../../../src/types/mssql.js';
-import { withMssqlValidation } from '../../../src/adapters/validators/mssql-validator.js';
+} from '../../../src/mssql/types.js';
+import { withMssqlValidation } from '../../../src/mssql/validator.js';
 
 const makeAdapter = (rows: QueryResultRow[] = []) => {
   const execute = vi.fn(async (_request: MssqlQueryRequest) => rows);

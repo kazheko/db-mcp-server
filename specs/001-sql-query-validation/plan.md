@@ -46,16 +46,18 @@ specs/001-sql-query-validation/
 
 ```text
 src/
-├── adapters/
-│   ├── mssql.ts            # Existing adapter implementation
-│   └── validators/         # Query validator higher-order functions
+├── mssql/
+│   ├── adapter.ts          # MSSQL adapter factory
+│   ├── validator.ts        # Query validator HOF
+│   ├── validation-policy.ts
+│   ├── tool.ts             # Tool schema + runtime
+│   └── types.ts            # Shared tool/adapter contracts
+├── shared/
+│   └── logging.ts          # Error-wrapping higher-order function
 ├── server/
 │   └── index.ts            # MCP server bootstrap wiring adapters + tools
-├── tools/
-│   ├── mssql-tool.ts       # Tool schema + factory
-│   └── log-wrapper.ts      # Error-wrapping higher-order function
-└── types/
-    └── mssql.ts            # Shared tool + adapter types
+└── adapters/
+    └── mssql-config.ts     # Connection string loader (shared)
 
 tests/
 ├── contract/
@@ -67,7 +69,7 @@ tests/
         └── mssql-query.test.ts      # Tool validation + responses
 ```
 
-**Structure Decision**: Retain single-service layout; add `validators` (or similar) under `src/adapters` for the decorator, update `src/tools` to compose it, and extend existing `tests/contract` + `tests/unit` suites accordingly.
+**Structure Decision**: Retain single-service layout with a vertical `src/mssql` module (adapters, validators, tool factory) plus shared helpers; extend existing `tests/contract` + `tests/unit` suites accordingly.
 
 ## Complexity Tracking
 

@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-import type { QueryResultRow } from '../../../../src/types/mssql.js';
+import type { QueryResultRow } from '../../../../src/mssql/types.js';
 
 export type MockMssqlState = {
   rows: QueryResultRow[];

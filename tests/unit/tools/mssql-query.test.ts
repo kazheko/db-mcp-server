@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { QueryAdapter, MssqlQueryRequest, QueryResultRow } from '../../../src/types/mssql.js';
-import { createMssqlTool } from '../../../src/tools/mssql-tool.js';
-import { withLogging } from '../../../src/tools/log-wrapper.js';
-import { withMssqlValidation } from '../../../src/adapters/validators/mssql-validator.js';
+import type { QueryAdapter, MssqlQueryRequest, QueryResultRow } from '../../../src/mssql/types.js';
+import { createMssqlTool } from '../../../src/mssql/tool.js';
+import { withLogging } from '../../../src/shared/logging.js';
+import { withMssqlValidation } from '../../../src/mssql/validator.js';
 
 class ThrowingAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
   constructor(private readonly errorToThrow: unknown) {}

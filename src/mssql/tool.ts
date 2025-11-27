@@ -6,8 +6,8 @@ import type {
   MssqlQueryRequest,
   MssqlQueryResponse,
   QueryResultRow
-} from '../types/mssql.js';
-import type { ToolDefinition } from './types.js';
+} from './types.js';
+import type { ToolDefinition } from '../tools/types.js';
 
 const inputSchema = z.object({
   database: z.string().describe('Logical database/catalog name to target.'),
@@ -37,10 +37,6 @@ const outputSchema = z.object({
 export const createMssqlTool = (
   adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>
 ): ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest> => {
-  const name = 'mssql-query';
-  const title = 'MSSQL Query Tool';
-  const description = 'Executes read-only SQL through the live MSSQL adapter for structural previewing.';
-
   const handler: ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest>['handler'] = async (
     params
   ) => {
@@ -70,9 +66,9 @@ export const createMssqlTool = (
   };
 
   return {
-    name,
-    title,
-    description,
+    name: 'mssql-query',
+    title: 'MSSQL Query Tool',
+    description: 'Executes read-only SQL through the live MSSQL adapter for structural previewing.',
     inputSchema,
     outputSchema,
     handler

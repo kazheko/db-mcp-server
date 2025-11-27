@@ -48,8 +48,9 @@ src/
 |-- server/
 |   `-- index.ts            # MCP server bootstrap + tool registration
 |-- tools/
-|   |-- mssql-tool.ts      # Tool metadata + factory function
-|   `-- log-wrapper.ts     # Logging/error wrapper
+|   `-- mssql-tool.ts      # Tool metadata + factory function
+|-- shared/
+|   `-- logging.ts         # Logging/error wrapper
 |-- adapters/
 |   `-- mssql.ts           # Stub implementation returning synthetic queryResults
 |-- errors/

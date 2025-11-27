@@ -1,7 +1,7 @@
 # Research Notes — SQL Query Validation Decorator
 
 ## Decision 1: Decorator Placement in Adapter Layer
-- **Decision**: Implement the validator as a standalone class in `src/adapters/validators/` that wraps any adapter exposing the existing `executeMetadataQuery`-style interface.
+- **Decision**: Implement the validator as a standalone module in `src/mssql/` that wraps any adapter exposing the existing `executeMetadataQuery`-style interface.
 - **Rationale**: Keeping the decorator near adapters ensures all downstream callers (tools, potential CLI utilities) receive identical safeguards without rewriting tool logic. It also keeps the path open for decorating future adapters (PostgreSQL, Cosmos DB) with the same contract.
 - **Alternatives considered**: (a) Embed validation directly in the MSSQL tool handler—rejected because future adapters would duplicate logic and tests. (b) Enforce validation inside the `mssql` driver config—rejected since it would mix transport plumbing with domain policies and complicate reuse.
 

@@ -2,7 +2,7 @@ import type {
   MssqlQueryRequest,
   QueryAdapter,
   QueryResultRow
-} from '../../types/mssql.js';
+} from './types.js';
 import {
   defaultValidationPolicy,
   type ValidationPolicy,
@@ -19,14 +19,14 @@ export const withMssqlValidation = (
   }
 });
 
+const collapseWhitespace = (value: string) => value.replace(/\s+/g, ' ').trim();
+
 export const formatValidationError = (query: string, reason: string) => {
   const normalized = collapseWhitespace(query);
   const snippet = normalized.length > 180 ? `${normalized.slice(0, 177)}...` : normalized;
   const display = snippet || '[empty query]';
   return `**Validation Error** ~~${display}~~ — ${reason}`;
 };
-
-const collapseWhitespace = (value: string) => value.replace(/\s+/g, ' ').trim();
 
 const testPattern = (pattern: ValidationPattern, value: string) => {
   const flags = pattern.expression.flags.replace('g', '');
@@ -112,5 +112,3 @@ const validateRequest = (request: MssqlQueryRequest, policy: ValidationPolicy) =
   checkStatementsAndTokens(sql, policy);
   checkPatterns(sql, policy);
 };
-
-export const ACTIVE_POLICY = defaultValidationPolicy;

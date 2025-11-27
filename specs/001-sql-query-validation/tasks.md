@@ -12,8 +12,8 @@ description: "Task list for SQL Query Validation Decorator"
 
 **Purpose**: Prepare validator scaffolding in the codebase
 
-- [X] T001 Create validator workspace by adding `src/adapters/validators/validation-policy.ts`
-- [X] T002 Stub decorator module `src/adapters/validators/mssql-validator.ts` that proxies to the adapter
+- [X] T001 Create validator workspace by adding `src/mssql/validation-policy.ts`
+- [X] T002 Stub decorator module `src/mssql/validator.ts` that proxies to the adapter
 
 ---
 
@@ -21,8 +21,8 @@ description: "Task list for SQL Query Validation Decorator"
 
 **Purpose**: Establish baseline policy data and wiring before story work begins
 
-- [X] T003 Define `ValidationPolicy` interface and blacklist collections in `src/adapters/validators/validation-policy.ts`
-- [X] T004 Export decorator factory signature and placeholder `formatError` helper in `src/adapters/validators/mssql-validator.ts`
+- [X] T003 Define `ValidationPolicy` interface and blacklist collections in `src/mssql/validation-policy.ts`
+- [X] T004 Export decorator factory signature and placeholder `formatError` helper in `src/mssql/validator.ts`
 - [X] T005 Wire `createMssqlTool` + `withLogging` to accept the decorated MSSQL adapter so the tool handler keeps existing error-wrapping behavior
 
 **Checkpoint**: Validator scaffolding and wiring exist; user stories can build logic on top
@@ -42,8 +42,8 @@ description: "Task list for SQL Query Validation Decorator"
 
 ### Implementation — User Story 1
 
-- [X] T008 [US1] Implement blacklist enforcement + multi-statement detection in `src/adapters/validators/mssql-validator.ts`
-- [X] T009 [US1] Invoke the validator before adapter execution inside `src/tools/mssql-tool.ts` so blocked queries never reach SQL Server
+- [X] T008 [US1] Implement blacklist enforcement + multi-statement detection in `src/mssql/validator.ts`
+- [X] T009 [US1] Invoke the validator before adapter execution inside `src/mssql/tool.ts` so blocked queries never reach SQL Server
 
 **Checkpoint**: Unsafe SQL is rejected with thrown errors; valid metadata queries flow through unchanged
 
@@ -61,8 +61,8 @@ description: "Task list for SQL Query Validation Decorator"
 
 ### Implementation — User Story 2
 
-- [X] T011 [US2] Implement `formatValidationError` helper in `src/adapters/validators/mssql-validator.ts` to wrap offending SQL
-- [X] T012 [US2] Ensure `src/tools/mssql-tool.ts` surfaces the thrown validator error unchanged so MCP structured content includes the message
+- [X] T011 [US2] Implement `formatValidationError` helper in `src/mssql/validator.ts` to wrap offending SQL
+- [X] T012 [US2] Ensure `src/mssql/tool.ts` surfaces the thrown validator error unchanged so MCP structured content includes the message
 
 **Checkpoint**: Invalid queries now show strikethrough messaging that downstream tools can render
 

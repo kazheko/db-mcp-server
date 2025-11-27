@@ -1,7 +1,7 @@
 import mssql from 'mssql';
 
-import type { MssqlQueryRequest, QueryAdapter, QueryResultRow } from '../types/mssql.js';
-import { loadConnectionConfig } from './mssql-config.js';
+import type { MssqlQueryRequest, QueryAdapter, QueryResultRow } from './types.js';
+import { loadConnectionConfig } from '../adapters/mssql-config.js';
 
 const DEFAULT_ROW_LIMIT = 100;
 const MAX_ROW_LIMIT = 1000;
