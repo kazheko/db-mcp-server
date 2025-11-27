@@ -1,19 +1,19 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { MssqlAdapter } from '../adapters/mssql.js';
-import { ToolFactory } from '../tools/tool-factory.js';
-import { MssqlValidator } from '../adapters/validators/mssql-validator.js';
+import { createMssqlAdapter } from '../adapters/mssql.js';
+import { withMssqlValidation } from '../adapters/validators/mssql-validator.js';
+import { createMssqlTool } from '../tools/mssql-tool.js';
+import { withLogging } from '../tools/log-wrapper.js';
 
 export const mcpServer = new McpServer({
   name: 'db-mcp-server',
   version: '0.1.0'
 });
 
-const adapter = new MssqlAdapter();
-const validatedAdapter = new MssqlValidator(adapter);
-const factory = new ToolFactory();
-const mssqlTool = factory.createMssqlTool(validatedAdapter);
+const adapter = createMssqlAdapter();
+const validatedAdapter = withMssqlValidation(adapter);
+const mssqlTool = withLogging(createMssqlTool(validatedAdapter));
 
 mcpServer.registerTool(
   mssqlTool.name,

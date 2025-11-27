@@ -5,7 +5,7 @@ import type {
   QueryAdapter,
   QueryResultRow
 } from '../../../src/types/mssql.js';
-import { MssqlValidator } from '../../../src/adapters/validators/mssql-validator.js';
+import { withMssqlValidation } from '../../../src/adapters/validators/mssql-validator.js';
 
 const makeAdapter = (rows: QueryResultRow[] = []) => {
   const execute = vi.fn(async (_request: MssqlQueryRequest) => rows);
@@ -18,7 +18,7 @@ const makeAdapter = (rows: QueryResultRow[] = []) => {
 describe('mssql validator', () => {
   it('allows metadata queries to reach the wrapped adapter', async () => {
     const { adapter, execute } = makeAdapter([{ name: 'sys.tables' }]);
-    const decorated = new MssqlValidator(adapter);
+    const decorated = withMssqlValidation(adapter);
 
     const request: MssqlQueryRequest = {
       database: 'master',
@@ -31,7 +31,7 @@ describe('mssql validator', () => {
 
   it('rejects DDL statements before hitting the adapter', async () => {
     const { adapter, execute } = makeAdapter();
-    const decorated = new MssqlValidator(adapter);
+    const decorated = withMssqlValidation(adapter);
 
     await expect(
       decorated.execute({
@@ -45,7 +45,7 @@ describe('mssql validator', () => {
 
   it('rejects multi-statement batches', async () => {
     const { adapter, execute } = makeAdapter();
-    const decorated = new MssqlValidator(adapter);
+    const decorated = withMssqlValidation(adapter);
 
     await expect(
       decorated.execute({
@@ -59,7 +59,7 @@ describe('mssql validator', () => {
 
   it('returns strikethrough validation errors for DML statements', async () => {
     const { adapter } = makeAdapter();
-    const decorated = new MssqlValidator(adapter);
+    const decorated = withMssqlValidation(adapter);
 
     await expect(
       decorated.execute({

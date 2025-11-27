@@ -18,7 +18,7 @@ vi.mock('../../../src/adapters/mssql-config.js', () => ({
   loadConnectionConfig: vi.fn(() => configMock)
 }));
 
-import { MssqlAdapter } from '../../../src/adapters/mssql.js';
+import { createMssqlAdapter } from '../../../src/adapters/mssql.js';
 
 describe('MssqlAdapter', () => {
   beforeEach(() => {
@@ -32,7 +32,7 @@ describe('MssqlAdapter', () => {
       { id: 3 }
     ]);
 
-    const adapter = new MssqlAdapter();
+    const adapter = createMssqlAdapter();
     const rows = await adapter.execute({
       database: 'hr',
       query: 'SELECT * FROM employees',
@@ -47,7 +47,7 @@ describe('MssqlAdapter', () => {
   it('applies default row limit when maxRows is not provided', async () => {
     setMockRows(Array.from({ length: 120 }, (_, index) => ({ id: index + 1 })));
 
-    const adapter = new MssqlAdapter();
+    const adapter = createMssqlAdapter();
     const rows = await adapter.execute({
       database: 'metadata',
       query: 'SELECT * FROM INFORMATION_SCHEMA.TABLES'
@@ -60,7 +60,7 @@ describe('MssqlAdapter', () => {
     const driverError = new Error('Query timeout');
     setMockError(driverError);
 
-    const adapter = new MssqlAdapter();
+    const adapter = createMssqlAdapter();
 
     await expect(
       adapter.execute({

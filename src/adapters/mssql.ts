@@ -6,36 +6,36 @@ import { loadConnectionConfig } from './mssql-config.js';
 const DEFAULT_ROW_LIMIT = 100;
 const MAX_ROW_LIMIT = 1000;
 
-export class MssqlAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
-  private readonly pool: mssql.ConnectionPool;
-
-  constructor(private readonly config = loadConnectionConfig()) {
-    this.pool = new mssql.ConnectionPool(this.config.rawConnectionString);
+const resolveRowLimit = (maxRows?: number) => {
+  if (typeof maxRows === 'number' && Number.isFinite(maxRows) && maxRows > 0) {
+    return Math.min(Math.floor(maxRows), MAX_ROW_LIMIT);
   }
+  return DEFAULT_ROW_LIMIT;
+};
 
-  async execute(request: MssqlQueryRequest): Promise<QueryResultRow[]> {
-    const pool = await this.ensurePool();
-    const result = await pool.request().query(request.query);
-    const rows = Array.isArray(result.recordset) ? result.recordset : [];
-    return this.limitRows(rows, request.maxRows);
-  }
+const limitRows = (rows: QueryResultRow[], maxRows?: number) => {
+  const limit = resolveRowLimit(maxRows);
+  return rows.slice(0, limit);
+};
 
-  private async ensurePool() {
-    if (!this.pool.connected) {
-      await this.pool.connect();
+export const createMssqlAdapter = (
+  config = loadConnectionConfig()
+): QueryAdapter<MssqlQueryRequest, QueryResultRow[]> => {
+  const pool = new mssql.ConnectionPool(config.rawConnectionString);
+
+  const ensurePool = async () => {
+    if (!pool.connected) {
+      await pool.connect();
     }
-    return this.pool;
-  }
+    return pool;
+  };
 
-  private limitRows(rows: QueryResultRow[], maxRows?: number) {
-    const limit = this.resolveRowLimit(maxRows);
-    return rows.slice(0, limit);
-  }
-
-  private resolveRowLimit(maxRows?: number) {
-    if (typeof maxRows === 'number' && Number.isFinite(maxRows) && maxRows > 0) {
-      return Math.min(Math.floor(maxRows), MAX_ROW_LIMIT);
+  return {
+    async execute(request) {
+      const poolInstance = await ensurePool();
+      const result = await poolInstance.request().query(request.query);
+      const rows = Array.isArray(result.recordset) ? result.recordset : [];
+      return limitRows(rows, request.maxRows);
     }
-    return DEFAULT_ROW_LIMIT;
-  }
-}
+  };
+};

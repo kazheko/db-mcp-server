@@ -5,10 +5,12 @@ import type {
   QueryAdapter,
   QueryResultRow
 } from '../../src/types/mssql.js';
-import { ToolFactory } from '../../src/tools/tool-factory.js';
-import { MssqlValidator } from '../../src/adapters/validators/mssql-validator.js';
+import { createMssqlTool } from '../../src/tools/mssql-tool.js';
+import { withLogging } from '../../src/tools/log-wrapper.js';
+import { withMssqlValidation } from '../../src/adapters/validators/mssql-validator.js';
 
-const factory = new ToolFactory();
+const createTool = (adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>) =>
+  withLogging(createMssqlTool(adapter));
 
 class FakeAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
   public callCount = 0;
@@ -27,9 +29,9 @@ class FakeAdapter implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]> {
 
 const invokeTool = async (
   adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>,
-  input: Parameters<ReturnType<ToolFactory['createMssqlTool']>['handler']>[0]
+  input: MssqlQueryRequest
 ) => {
-  const tool = factory.createMssqlTool({ adapter });
+  const tool = createTool(adapter);
   return tool.handler(input);
 };
 
@@ -68,7 +70,7 @@ describe('mssql-query tool contract', () => {
   });
 
   it('exposes manifest metadata for discovery', () => {
-    const tool = factory.createMssqlTool({ adapter: new FakeAdapter() });
+    const tool = createTool(new FakeAdapter());
     expect(tool.title).toBe('MSSQL Query Tool');
     expect(tool.description).toMatch(/read-only/i);
 
@@ -88,10 +90,10 @@ describe('mssql-query tool contract', () => {
     });
     expect(outputResult.success).toBe(true);
   });
-});
+
   it('rejects DML before the adapter executes', async () => {
     const baseAdapter = new FakeAdapter();
-    const decorated = new MssqlValidator(baseAdapter);
+    const decorated = withMssqlValidation(baseAdapter);
 
     const result: ToolResult = await invokeTool(decorated, {
       database: 'master',
@@ -102,3 +104,4 @@ describe('mssql-query tool contract', () => {
     expect(result.isError).toBe(true);
     expect(result.content?.[0]?.text ?? '').toContain('Validation Error');
   });
+});

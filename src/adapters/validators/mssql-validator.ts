@@ -9,19 +9,15 @@ import {
   type ValidationPattern
 } from './validation-policy.js';
 
-export class MssqlValidator
-  implements QueryAdapter<MssqlQueryRequest, QueryResultRow[]>
-{
-  constructor(
-    private readonly adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>,
-    private readonly policy: ValidationPolicy = defaultValidationPolicy
-  ) {}
-
-  async execute(request: MssqlQueryRequest) {
-    validateRequest(request, this.policy);
-    return this.adapter.execute(request);
+export const withMssqlValidation = (
+  adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>,
+  policy: ValidationPolicy = defaultValidationPolicy
+): QueryAdapter<MssqlQueryRequest, QueryResultRow[]> => ({
+  async execute(request) {
+    validateRequest(request, policy);
+    return adapter.execute(request);
   }
-}
+});
 
 export const formatValidationError = (query: string, reason: string) => {
   const normalized = collapseWhitespace(query);

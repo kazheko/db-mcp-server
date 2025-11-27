@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-import { MssqlAdapter } from '../../src/adapters/mssql.js';
-import { ToolFactory } from '../../src/tools/tool-factory.js';
-import { MssqlValidator } from '../../src/adapters/validators/mssql-validator.js';
+import { createMssqlAdapter } from '../../src/adapters/mssql.js';
+import { withMssqlValidation } from '../../src/adapters/validators/mssql-validator.js';
+import { createMssqlTool } from '../../src/tools/mssql-tool.js';
+import { withLogging } from '../../src/tools/log-wrapper.js';
 
 type ParsedArgs = Record<string, string | undefined>;
 
-type ToolResult = Awaited<ReturnType<ReturnType<ToolFactory['createMssqlTool']>['handler']>>;
+type ToolResult = Awaited<ReturnType<ReturnType<typeof createMssqlTool>['handler']>>;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const args: ParsedArgs = {};
@@ -26,9 +27,9 @@ function parseArgs(argv: string[]): ParsedArgs {
 
 async function main() {
   const rawArgs = parseArgs(process.argv.slice(2));
-  const adapter = new MssqlAdapter();
-  const validatedAdapter = new MssqlValidator(adapter);
-  const tool = new ToolFactory().createMssqlTool(validatedAdapter );
+  const adapter = createMssqlAdapter();
+  const validatedAdapter = withMssqlValidation(adapter);
+  const tool = withLogging(createMssqlTool(validatedAdapter));
 
   if ('describe' in rawArgs) {
     console.log(

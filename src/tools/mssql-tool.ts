@@ -34,23 +34,20 @@ const outputSchema = z.object({
     .describe('ISO-8601 timestamp recorded immediately after the adapter resolves.')
 });
 
-export class MssqlTool
-  implements ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest>
-{
-  readonly name = 'mssql-query';
-  readonly title = 'MSSQL Query Tool';
-  readonly description =
-    'Executes read-only SQL through the live MSSQL adapter for structural previewing.';
-  readonly inputSchema = inputSchema;
-  readonly outputSchema = outputSchema;
+export const createMssqlTool = (
+  adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>
+): ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest> => {
+  const name = 'mssql-query';
+  const title = 'MSSQL Query Tool';
+  const description = 'Executes read-only SQL through the live MSSQL adapter for structural previewing.';
 
-  constructor(private readonly adapter: QueryAdapter<MssqlQueryRequest, QueryResultRow[]>) {}
-
-  handler = async (params: MssqlQueryRequest) => {
+  const handler: ToolDefinition<typeof inputSchema, typeof outputSchema, MssqlQueryRequest>['handler'] = async (
+    params
+  ) => {
     const correlationId = uuidv4();
     const startedAt = new Date().toISOString();
 
-    const queryResult = await this.adapter.execute(params);
+    const queryResult = await adapter.execute(params);
 
     const completedAt = new Date().toISOString();
     const payload: MssqlQueryResponse = {
@@ -71,4 +68,13 @@ export class MssqlTool
       structuredContent: payload
     };
   };
-}
+
+  return {
+    name,
+    title,
+    description,
+    inputSchema,
+    outputSchema,
+    handler
+  };
+};

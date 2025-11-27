@@ -1,25 +1,11 @@
 import type { ToolContent, ToolDefinition } from './types.js';
 
-export class LogWrapper<TInputSchema, TOutputSchema, TRequest>
-  implements ToolDefinition<TInputSchema, TOutputSchema, TRequest>
-{
-  readonly name;
-  readonly title;
-  readonly description;
-  readonly inputSchema;
-  readonly outputSchema;
-
-  constructor(private readonly inner: ToolDefinition<TInputSchema, TOutputSchema, TRequest>) {
-    this.name = inner.name;
-    this.title = inner.title;
-    this.description = inner.description;
-    this.inputSchema = inner.inputSchema;
-    this.outputSchema = inner.outputSchema;
-  }
-
-  handler = async (params: TRequest) => {
+export const withLogging = <TInputSchema, TOutputSchema, TRequest>(
+  inner: ToolDefinition<TInputSchema, TOutputSchema, TRequest>
+): ToolDefinition<TInputSchema, TOutputSchema, TRequest> => {
+  const handler: ToolDefinition<TInputSchema, TOutputSchema, TRequest>['handler'] = async (params) => {
     try {
-      return await this.inner.handler(params);
+      return await inner.handler(params);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return {
@@ -33,4 +19,13 @@ export class LogWrapper<TInputSchema, TOutputSchema, TRequest>
       };
     }
   };
-}
+
+  return {
+    name: inner.name,
+    title: inner.title,
+    description: inner.description,
+    inputSchema: inner.inputSchema,
+    outputSchema: inner.outputSchema,
+    handler
+  };
+};
