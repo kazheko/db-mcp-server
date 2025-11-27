@@ -5,7 +5,7 @@
 
 ## Summary
 
-Replace the deterministic `StubMssqlAdapter` with a production adapter that opens a pooled connection to SQL Server using the `MSSQL_CONNECTION_STRING` environment variable and streams metadata rows back through the MCP tool while propagating driver errors verbatim. Read-only intent is still documented for operators, but SQL-text validation is explicitly deferred to a follow-on specification so the adapter itself performs no query sanitization yet. The implementation keeps the MCP server TypeScript-first, wires the adapter via the existing `ToolFactory`, updates unit/contract tests, and documents runtime configuration so operators can point to new databases by setting the environment variable and restarting the process.
+Replace the deterministic `StubMssqlAdapter` with a production adapter that opens a pooled connection to SQL Server using the `MSSQL_CONNECTION_STRING` environment variable and streams metadata rows back through the MCP tool while propagating driver errors verbatim. Read-only intent is still documented for operators, but SQL-text validation is explicitly deferred to a follow-on specification so the adapter itself performs no query sanitization yet. The implementation keeps the MCP server TypeScript-first and composes adapters/tools via lightweight factories (`createMssqlAdapter`, `withMssqlValidation`, `createMssqlTool`, `withLogging`), updates unit/contract tests, and documents runtime configuration so operators can point to new databases by setting the environment variable and restarting the process.
 
 ## Technical Context
 
@@ -51,9 +51,8 @@ src/
 ├── server/
 │   └── index.ts                  # MCP entry that wires adapters/tools
 ├── tools/
-│   ├── mssql-tool.ts             # Tool schema + handler
-│   ├── tool-factory.ts           # Factory that injects adapters
-│   └── log-wrapper.ts            # Error-wrapping decorator
+│   ├── mssql-tool.ts             # Tool schema + factory function
+│   └── log-wrapper.ts            # Error-wrapping higher-order function
 └── types/
     └── mssql.ts                  # Shared contracts used by tools/adapters
 

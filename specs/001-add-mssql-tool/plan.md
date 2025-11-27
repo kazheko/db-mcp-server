@@ -48,13 +48,14 @@ src/
 |-- server/
 |   `-- index.ts            # MCP server bootstrap + tool registration
 |-- tools/
-|   |-- mssql-tool.ts      # Tool metadata + handler composition\n|   `-- tool-factory.ts    # Factory for building and registering tools
+|   |-- mssql-tool.ts      # Tool metadata + factory function
+|   `-- log-wrapper.ts     # Logging/error wrapper
 |-- adapters/
-|   `-- mssql.ts            # Stub implementation returning synthetic queryResults
+|   `-- mssql.ts           # Stub implementation returning synthetic queryResults
 |-- errors/
-|   `-- handler.ts          # Shared error passthrough helpers
+|   `-- handler.ts         # Shared error passthrough helpers
 `-- types/
-    `-- mssql.ts            # Shared TypeScript interfaces for adapters + payloads
+    `-- mssql.ts           # Shared TypeScript interfaces for adapters + payloads
 
 tests/
 |-- contract/

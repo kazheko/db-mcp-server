@@ -48,12 +48,12 @@ specs/001-sql-query-validation/
 src/
 ├── adapters/
 │   ├── mssql.ts            # Existing adapter implementation
-│   └── validators/         # New query validator + decorator binding
+│   └── validators/         # Query validator higher-order functions
 ├── server/
-│   └── index.ts            # MCP server bootstrap and tool registration
+│   └── index.ts            # MCP server bootstrap wiring adapters + tools
 ├── tools/
-│   ├── mssql-tool.ts       # Tool handler using adapters
-│   └── tool-factory.ts     # Registration helpers
+│   ├── mssql-tool.ts       # Tool schema + factory
+│   └── log-wrapper.ts      # Error-wrapping higher-order function
 └── types/
     └── mssql.ts            # Shared tool + adapter types
 

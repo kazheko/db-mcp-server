@@ -23,7 +23,7 @@ description: "Task list for SQL Query Validation Decorator"
 
 - [X] T003 Define `ValidationPolicy` interface and blacklist collections in `src/adapters/validators/validation-policy.ts`
 - [X] T004 Export decorator factory signature and placeholder `formatError` helper in `src/adapters/validators/mssql-validator.ts`
-- [X] T005 Update `src/tools/tool-factory.ts` to accept a decorated MSSQL adapter while keeping the existing log wrapper
+- [X] T005 Wire `createMssqlTool` + `withLogging` to accept the decorated MSSQL adapter so the tool handler keeps existing error-wrapping behavior
 
 **Checkpoint**: Validator scaffolding and wiring exist; user stories can build logic on top
 
@@ -80,7 +80,7 @@ description: "Task list for SQL Query Validation Decorator"
 
 ### Implementation — User Story 3
 
-- [X] T014 [US3] Wrap `MssqlAdapter` with the validator inside `src/server/index.ts` (and ensure `ToolFactory` composes the decorated instance)
+- [X] T014 [US3] Compose `createMssqlAdapter` with `withMssqlValidation` + `withLogging(createMssqlTool(...))` in `src/server/index.ts` so every request flows through the validator without relying on the old ToolFactory
 - [X] T015 [US3] Update `specs/001-sql-query-validation/quickstart.md` with steps to run an allowed query and a rejected query through the new decorator
 
 **Checkpoint**: Decorated adapter behaves identically to the legacy adapter for compliant metadata queries
