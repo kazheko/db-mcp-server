@@ -11,8 +11,8 @@
 
 **Purpose**: Document environment prerequisites so engineers/operators know how to enable the PostgreSQL tool.
 
-- [ ] T001 Update `POSTGRES_CONNECTION_STRING` guidance in `.env.example` so it explicitly mentions enabling the metadata tool entry point.
-- [ ] T002 [P] Add a PostgreSQL tool prerequisites callout in `docs/postgres-adapter.md` under “Required Environment Variable”.
+- [X] T001 Update `POSTGRES_CONNECTION_STRING` guidance in `.env.example` so it explicitly mentions enabling the metadata tool entry point.
+- [X] T002 [P] Add a PostgreSQL tool prerequisites callout in `docs/postgres-adapter.md` under “Required Environment Variable”.
 
 ---
 
@@ -20,8 +20,8 @@
 
 **Purpose**: Prepare shared exports and contract types every user story depends on.
 
-- [ ] T003 Ensure `src/postgres/index.ts` exports the adapter + validator helpers needed by the tool handler.
-- [ ] T004 [P] Extend `src/shared/queries.ts` with the `PostgresToolDefinition`/`PostgresToolInvocation` types from data-model.md.
+- [X] T003 Ensure `src/postgres/index.ts` exports the adapter + validator helpers needed by the tool handler.
+- [X] T004 [P] Scaffold the PostgreSQL tool module (`src/postgres/tool.ts`) with dedicated Zod schemas for inputs/outputs.
 
 **Checkpoint**: Adapter entry points and shared request/response types are ready for use.
 
@@ -35,10 +35,10 @@
 
 ### Implementation
 
-- [ ] T005 [P] [US1] Add the PostgreSQL tool parameter schema + type exports to `src/tools/types.ts` using Zod (database/query/maxRows).
-- [ ] T006 [US1] Implement `executePostgresMetadataQuery` handler in `src/server/postgres-metadata-tool.ts` that validates input and calls the adapter.
-- [ ] T007 [US1] Register the handler inside `src/server/index.ts`, ensuring the MCP server exposes `postgres.metadataQuery` when the adapter is enabled.
-- [ ] T008 [P] [US1] Create unit tests in `tests/unit/postgres/postgres-metadata-tool.test.ts` covering success responses and validation failures before adapter calls.
+- [X] T005 [P] [US1] Implement `createPostgresTool` in `src/postgres/tool.ts` using the shared QueryAdapter + Zod schemas.
+- [X] T006 [US1] Register the tool inside `src/server/index.ts`, ensuring the MCP server exposes `postgres.metadataQuery` when the adapter is enabled.
+- [X] T007 [P] [US1] Create unit tests in `tests/unit/postgres/postgres-tool.test.ts` covering success responses and adapter error propagation.
+- [X] T008 [US1] Wrap tool registration with logging utilities so structured payloads surface via MCP responses.
 
 **Checkpoint**: The tool runs end-to-end for compliant metadata queries.
 
@@ -52,9 +52,9 @@
 
 ### Implementation
 
-- [ ] T009 [US2] Enhance the tool manifest builder in `src/tools/types.ts` with descriptions, docsUrl, and disabled reason text sourced from spec.md.
-- [ ] T010 [P] [US2] Align `contracts/postgres-tool-openapi.yaml` with the final schema (parameter descriptions, response envelopes, disabled states).
-- [ ] T011 [P] [US2] Add a “Client Integration” subsection in `docs/postgres-adapter.md` explaining handshake metadata and field-level validation hints.
+- [X] T009 [US2] Enhance the tool manifest builder in `src/tools/types.ts` with descriptions, docsUrl, and disabled reason text sourced from spec.md.
+- [X] T010 [P] [US2] Align `contracts/postgres-tool-openapi.yaml` with the final schema (parameter descriptions, response envelopes, disabled states).
+- [X] T011 [P] [US2] Add a “Client Integration” subsection in `docs/postgres-adapter.md` explaining handshake metadata and field-level validation hints.
 
 **Checkpoint**: Clients can discover and render the tool using only handshake + contract artifacts.
 
@@ -68,9 +68,9 @@
 
 ### Implementation
 
-- [ ] T012 [US3] Gate tool registration inside `src/server/index.ts` so missing/invalid `POSTGRES_CONNECTION_STRING` keeps the tool disabled with remediation text.
-- [ ] T013 [P] [US3] Expand `specs/001-add-postgres-tool/quickstart.md` with troubleshooting steps covering env misconfigurations and timeouts.
-- [ ] T014 [P] [US3] Document failure-playbook scenarios (missing env, driver timeout, validation block) in `docs/postgres-adapter.md` under an “Operations” section.
+- [X] T012 [US3] Gate tool registration inside `src/server/index.ts` so missing/invalid `POSTGRES_CONNECTION_STRING` keeps the tool disabled with remediation text.
+- [X] T013 [P] [US3] Expand `specs/001-add-postgres-tool/quickstart.md` with troubleshooting steps covering env misconfigurations and timeouts.
+- [X] T014 [P] [US3] Document failure-playbook scenarios (missing env, driver timeout, validation block) in `docs/postgres-adapter.md` under an “Operations” section.
 
 **Checkpoint**: Operators can safely manage the tool lifecycle using configuration gates and documentation.
 
@@ -80,8 +80,8 @@
 
 **Purpose**: Finalize shared documentation and manual validation artifacts across slices.
 
-- [ ] T015 Capture success + validation error payload samples after manual runs and embed them in `docs/postgres-adapter.md`.
-- [ ] T016 Update `specs/001-add-postgres-tool/quickstart.md` with the exact `npm run mcp:invoke` command/output captured in T015 for future smoke tests.
+- [X] T015 Capture success + validation error payload samples after manual runs and embed them in `docs/postgres-adapter.md`.
+- [X] T016 Update `specs/001-add-postgres-tool/quickstart.md` with the exact `npm run mcp:invoke` command/output captured in T015 for future smoke tests.
 
 ---
 

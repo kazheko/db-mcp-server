@@ -4,6 +4,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { createMssqlAdapter } from '../mssql/adapter.js';
 import { withMssqlValidation } from '../mssql/validator.js';
 import { createMssqlTool } from '../mssql/tool.js';
+import { createPostgresAdapter, withPostgresValidation, createPostgresTool } from '../postgres/index.js';
 import { withLogging } from '../shared/logging.js';
 
 export const mcpServer = new McpServer({
@@ -25,6 +26,30 @@ mcpServer.registerTool(
   },
   mssqlTool.handler
 );
+
+const tryRegisterPostgresTool = () => {
+  try {
+    const adapter = createPostgresAdapter();
+    const validatedAdapter = withPostgresValidation(adapter);
+    const postgresTool = withLogging(createPostgresTool(validatedAdapter));
+
+    mcpServer.registerTool(
+      postgresTool.name,
+      {
+        title: postgresTool.title,
+        description: postgresTool.description,
+        inputSchema: postgresTool.inputSchema,
+        outputSchema: postgresTool.outputSchema
+      },
+      postgresTool.handler
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn('[postgres-tool] Disabled:', message);
+  }
+};
+
+tryRegisterPostgresTool();
 
 async function main() {
   const transport = new StdioServerTransport();

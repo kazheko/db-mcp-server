@@ -48,13 +48,13 @@ components:
       properties:
         database:
           type: string
-          description: Logical database name/identifier configured for metadata access.
+          description: Logical metadata database/catalog identifier (e.g., metadata).
           minLength: 1
         query:
           type: string
           description: >-
-            Single SQL statement targeting pg_catalog/information_schema.
-            Validated to ensure read-only semantics and to reject semicolon-delimited batches.
+            Single SQL statement targeting pg_catalog/information_schema. The server rejects any
+            statement referencing user schemas or multi-statement batches.
           minLength: 1
         maxRows:
           type: integer
@@ -72,32 +72,26 @@ components:
         - startedAt
         - completedAt
       properties:
-        toolName:
+        correlationId:
           type: string
-          example: postgres.metadataQuery
+          format: uuid
         database:
           type: string
-        rowCount:
-          type: integer
-          description: Actual rows returned (may be truncated by maxRows).
-        result:
+        queryResult:
           type: array
           description: Metadata rows as key/value objects.
           items:
             type: object
             additionalProperties: {}
+        rowCount:
+          type: integer
+          description: Actual rows returned (may be truncated by maxRows).
         startedAt:
           type: string
           format: date-time
         completedAt:
           type: string
           format: date-time
-        status:
-          type: string
-          enum: [success]
-        correlationId:
-          type: string
-          format: uuid
     PostgresMetadataQueryError:
       type: object
       required:
@@ -108,20 +102,6 @@ components:
         toolName:
           type: string
           example: postgres.metadataQuery
-        status:
+        message:
           type: string
-          enum: [validation_error, adapter_error, disabled]
-        error:
-          type: object
-          required:
-            - message
-          properties:
-            message:
-              type: string
-              description: Summary for MCP clients.
-            remediation:
-              type: string
-              description: Actionable instruction for caller/operator.
-            details:
-              type: object
-              additionalProperties: {}
+          description: Plain-text error message propagated by the MCP tool when validation or adapter errors occur.

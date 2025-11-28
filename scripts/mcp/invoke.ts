@@ -98,7 +98,7 @@ async function runPostgresInvocation(params: {
     process.exit(1);
   }
 
-  const adapter = createPostgresAdapter({ connectionString });
+  const adapter = createPostgresAdapter();
   const correlationId = uuidv4();
   const startedAt = new Date().toISOString();
   try {

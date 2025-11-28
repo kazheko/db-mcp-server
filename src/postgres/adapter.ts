@@ -1,18 +1,11 @@
-import { Pool, type PoolConfig } from 'pg';
+import { Pool } from 'pg';
 
 import type { QueryAdapter, QueryRequest, QueryResultRow } from '../shared/queries.js';
-import { withPostgresValidation } from './validator.js';
 import { loadPostgresConnectionConfig } from '../adapters/postgres-config.js';
 
 const DEFAULT_ROW_LIMIT = 100;
 const MAX_ROW_LIMIT = 1000;
 const DEFAULT_TIMEOUT_MS = 30_000;
-
-export type PostgresAdapterConfig = {
-  connectionString?: string;
-  poolOptions?: PoolConfig;
-  timeoutMs?: number;
-};
 
 const resolveRowLimit = (maxRows?: number) => {
   if (typeof maxRows === 'number' && Number.isFinite(maxRows) && maxRows > 0) {
@@ -27,19 +20,15 @@ const limitRows = (rows: QueryResultRow[], maxRows?: number) => {
 };
 
 export const createPostgresAdapter = (
-  config: PostgresAdapterConfig = {}
+  config = loadPostgresConnectionConfig()
 ): QueryAdapter<QueryRequest, QueryResultRow[]> => {
-  const connectionString = config.connectionString ?? loadPostgresConnectionConfig().rawConnectionString;
-
-  const timeout = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const pool = new Pool({
-    connectionString,
-    statement_timeout: timeout,
-    query_timeout: timeout,
-    ...config.poolOptions
+    connectionString: config.rawConnectionString,
+    statement_timeout: DEFAULT_TIMEOUT_MS,
+    query_timeout: DEFAULT_TIMEOUT_MS
   });
 
-  const baseAdapter: QueryAdapter<QueryRequest, QueryResultRow[]> = {
+  return {
     async execute(request) {
       const client = await pool.connect();
       try {
@@ -51,6 +40,4 @@ export const createPostgresAdapter = (
       }
     }
   };
-
-  return withPostgresValidation(baseAdapter);
 };
