@@ -1,0 +1,127 @@
+openapi: 3.0.3
+info:
+  title: PostgreSQL Metadata Query Tool API
+  version: 0.1.0
+  description: >-
+    Logical contract that mirrors the MCP tool invocation for postgres.metadataQuery.
+    Describes required inputs and response envelope for downstream automation/tests.
+paths:
+  /tools/postgres/metadata-query:
+    post:
+      summary: Execute a single PostgreSQL metadata query through the MCP server.
+      description: >-
+        Accepts a read-only single SQL statement plus explicit database context and
+        returns a metadata-only result set limited by maxRows.
+      operationId: invokePostgresMetadataQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostgresMetadataQueryRequest'
+      responses:
+        '200':
+          description: Metadata query executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresMetadataQueryResponse'
+        '400':
+          description: Validation failure (missing params, multi-statement, disallowed schemas).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresMetadataQueryError'
+        '503':
+          description: Tool disabled or adapter unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresMetadataQueryError'
+components:
+  schemas:
+    PostgresMetadataQueryRequest:
+      type: object
+      required:
+        - database
+        - query
+      properties:
+        database:
+          type: string
+          description: Logical database name/identifier configured for metadata access.
+          minLength: 1
+        query:
+          type: string
+          description: >-
+            Single SQL statement targeting pg_catalog/information_schema.
+            Validated to ensure read-only semantics and to reject semicolon-delimited batches.
+          minLength: 1
+        maxRows:
+          type: integer
+          minimum: 1
+          maximum: 2000
+          default: 200
+          description: Optional row cap applied by the adapter.
+    PostgresMetadataQueryResponse:
+      type: object
+      required:
+        - toolName
+        - database
+        - status
+        - rowCount
+        - startedAt
+        - completedAt
+      properties:
+        toolName:
+          type: string
+          example: postgres.metadataQuery
+        database:
+          type: string
+        rowCount:
+          type: integer
+          description: Actual rows returned (may be truncated by maxRows).
+        result:
+          type: array
+          description: Metadata rows as key/value objects.
+          items:
+            type: object
+            additionalProperties: {}
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [success]
+        correlationId:
+          type: string
+          format: uuid
+    PostgresMetadataQueryError:
+      type: object
+      required:
+        - toolName
+        - status
+        - error
+      properties:
+        toolName:
+          type: string
+          example: postgres.metadataQuery
+        status:
+          type: string
+          enum: [validation_error, adapter_error, disabled]
+        error:
+          type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: Summary for MCP clients.
+            remediation:
+              type: string
+              description: Actionable instruction for caller/operator.
+            details:
+              type: object
+              additionalProperties: {}
