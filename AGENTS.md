@@ -1,44 +1,38 @@
-﻿# db-mcp-server Development Guidelines
+# Repository Guidelines
 
-Auto-generated from all feature plans. Last updated: 2025-11-24
+This project ships an MCP-compatible server exposing two independent database tools: an MSSQL executor and a PostgreSQL executor. Each tool owns its adapter, validation layer, and logging wrapper, keeping implementations isolated while sharing the same server transport.
 
-## Active Technologies
-- TypeScript 5.x on Node.js 20 + `@modelcontextprotocol/server`, `uuid`, `ts-node`/`tsx` for dev workflow (001-add-mssql-tool)
-- N/A (stub adapter, no persistence) (001-add-mssql-tool)
-- TypeScript 5.6.x on Node.js 20 (ESM) + `@modelcontextprotocol/sdk`, `zod`, `uuid`, `mssql` (tedious driver), `tsx` for dev scripts (001-mssql-adapter)
-- Microsoft SQL Server (read-only single query against metadata catalogs) (001-mssql-adapter)
-- TypeScript 5.6 on Node.js 20 (ESM build) + `@modelcontextprotocol/sdk`, `mssql` (Tedious driver), `zod`, `uuid` (001-sql-query-validation)
-- Microsoft SQL Server metadata catalogs accessed via read-only single queries (001-sql-query-validation)
-- TypeScript 5.6 on Node.js 20 (ESM build) + `@modelcontextprotocol/sdk`, `zod`, `uuid`, `pg` (node-postgres), shared SQL validator utilities, `tsx` for scripts (001-postgres-adapter)
-- PostgreSQL metadata catalogs accessed through a single connection string (read-only, single statement per invocation) (001-postgres-adapter)
-- TypeScript 5.6 (ESM) on Node.js 20. + `@modelcontextprotocol/sdk`, `@modelcontextprotocol/server`, `zod`, `uuid`, `pg`, shared SQL validator utilities. (001-add-postgres-tool)
-- PostgreSQL metadata catalogs accessed read-only through the existing adapter. (001-add-postgres-tool)
+## Project Structure & Module Organization
+- `src/` holds the TypeScript source (server entrypoints, adapters, shared utilities) and follows a vertical-slice approach: feature code stays inside its domain folder.
+- MSSQL-specific adapters, validators, and tools live in `src/mssql`; PostgreSQL logic mirrors that layout, while reusable utilities belong in `src/shared`.
+- `tests/` mirrors the source layout with Vitest specs such as `tests/mssql/tool.spec.ts`; store fixtures beside their specs.
+- `docs/` and `specs/` track protocol references and design notes—update them when contracts or flows change.
+- `scripts/` contains helper CLIs (notably `scripts/mcp/invoke.ts`). `dist/` is compiler output from `npm run build`; never edit it directly.
 
-- [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (001-add-mssql-tool)
+## Build, Test, and Development Commands
+- `npm run dev:mcp` – start the MCP server with live TypeScript execution via `tsx` and `.env` configuration.
+- `npm run build` – compile TypeScript to ESM JavaScript in `dist/` using `tsc -p tsconfig.json`.
+- `npm run start` – launch the compiled server (`dist/src/server/index.js`). Run this to reproduce production behavior.
+- `npx @modelcontextprotocol/inspector node --env-file=.env dist/src/server/index.js` – inspect the running MCP server with Inspector against the built output.
+- `npm run mcp:invoke` – exercise the registered tools from the command line while developing schemas.
+- `npm run test` / `npm run test:watch` – execute or continuously run the Vitest suite.
 
-## Project Structure
+## Coding Style & Naming Conventions
+- Use TypeScript, modern ECMAScript modules, and 2-space indentation. Keep imports ordered by package, then local paths.
+- Favor descriptive `camelCase` for functions/variables, `PascalCase` for classes/types, and suffix adapters/tools with their purpose (e.g., `createMssqlAdapter`).
+- Reuse shared helpers under `src/shared/` and validate inputs with Zod before calling database drivers.
 
-```text
-backend/
-frontend/
-tests/
-```
+## Testing Guidelines
+- Write unit tests in Vitest under `tests/` using the `*.spec.ts` suffix and mirroring the source path.
+- Mock database calls with stubs or adapters; only integration specs should hit real instances configured through `.env`.
+- Run `npm run test` (or `vitest watch`) before pushing; keep coverage meaningful for each new tool or adapter.
 
-## Commands
+## Commit & Pull Request Guidelines
+- Follow the existing log: short, imperative summaries (`implement postgres tool`, `fix tests`). Reference issues with `(#123)` when applicable.
+- Each PR should describe motivation, summarize changes, and note testing performed. Include screenshots or CLI transcripts when altering observable behavior.
+- Keep commits focused on a single concern, ensure `npm run build` and `npm run test` pass, and update docs/specs whenever protocol contracts change.
 
-cd src; pytest; ruff check .
-
-## Code Style
-
-[e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]: Follow standard conventions
-
-## Recent Changes
-- 001-add-postgres-tool: Added TypeScript 5.6 (ESM) on Node.js 20. + `@modelcontextprotocol/sdk`, `@modelcontextprotocol/server`, `zod`, `uuid`, `pg`, shared SQL validator utilities.
-- 001-postgres-adapter: Added TypeScript 5.6 on Node.js 20 (ESM build) + `@modelcontextprotocol/sdk`, `zod`, `uuid`, `pg` (node-postgres), shared SQL validator utilities, `tsx` for scripts
-- 001-sql-query-validation: Added TypeScript 5.6 on Node.js 20 (ESM build) + `@modelcontextprotocol/sdk`, `mssql` (Tedious driver), `zod`, `uuid`
-
-
-<!-- MANUAL ADDITIONS START -->
-### PostgreSQL Adapter Notes (001-postgres-adapter)
-
-<!-- MANUAL ADDITIONS END -->
+## Security & Configuration Tips
+- Never commit `.env`; `.env.example` is the authoritative reference for required keys.
+- Rotate connection strings regularly and prefer parameterized queries in adapters to avoid injection risks.
+- Gate experimental tools behind environment flags so agents can opt in safely.
